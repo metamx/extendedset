@@ -1,0 +1,9 @@
+*.ipr
+*.iws
+*.iml
+target
+dist
+*.jar
+*.tar
+*.zip
+*.DS_Store
