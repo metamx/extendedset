@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package java.it.uniroma3.mat.extendedset;
+package it.uniroma3.mat.extendedset;
 
 import it.uniroma3.mat.extendedset.ExtendedSet;
 import it.uniroma3.mat.extendedset.ExtendedSet.ExtendedIterator;

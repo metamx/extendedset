@@ -26,6 +26,8 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.Collection;
 import java.util.ConcurrentModificationException;
+import java.util.Formatter;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 
 /**
@@ -52,7 +54,7 @@ import java.util.NoSuchElementException;
  * @author Alessandro Colantonio
  * @version $Id$
  */
-public class ImmutableConciseSet extends ConciseSet
+public class ImmutableConciseSet extends AbstractIntSet implements java.io.Serializable
 {
   /**
    * This is the compressed bitmap, that is a collection of words. For each
@@ -564,6 +566,14 @@ public class ImmutableConciseSet extends ConciseSet
     }
 
     return res;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public IntBuffer getCompressedBitmap()
+  {
+    return words;
   }
 
   /**
@@ -1632,6 +1642,14 @@ public class ImmutableConciseSet extends ConciseSet
     return size;
   }
 
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public ImmutableConciseSet empty() {
+		throw new UnsupportedOperationException();
+	}
+
   /**
    * {@inheritDoc}
    */
@@ -1644,7 +1662,6 @@ public class ImmutableConciseSet extends ConciseSet
     result = 31 * result + size;
     result = 31 * result + lastWordIndex;
     result = 31 * result + (simulateWAH ? 1 : 0);
-    result = 31 * result + modCount;
     return result;
   }
 
@@ -1672,9 +1689,7 @@ public class ImmutableConciseSet extends ConciseSet
     if (lastWordIndex != that.lastWordIndex) {
       return false;
     }
-    if (modCount != that.modCount) {
-      return false;
-    }
+
     if (simulateWAH != that.simulateWAH) {
       return false;
     }
@@ -1842,4 +1857,127 @@ public class ImmutableConciseSet extends ConciseSet
   {
     throw new UnsupportedOperationException();
   }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public double bitmapCompressionRatio() {
+		if (isEmpty())
+			return 0D;
+		return (lastWordIndex + 1) / Math.ceil((1 + last) / 32D);
+	}
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public double collectionCompressionRatio() {
+    if (isEmpty())
+      return 0D;
+    return (double) (lastWordIndex + 1) / size();
+  }
+
+  /*
+   * DEBUGGING METHODS
+   */
+
+	/**
+	 * Generates the 32-bit binary representation of a given word (debug only)
+	 *
+	 * @param word
+	 *            word to represent
+	 * @return 32-character string that represents the given word
+	 */
+	private static String toBinaryString(int word) {
+		String lsb = Integer.toBinaryString(word);
+		StringBuilder pad = new StringBuilder();
+		for (int i = lsb.length(); i < 32; i++)
+			pad.append('0');
+		return pad.append(lsb).toString();
+	}
+
+  /**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String debugInfo() {
+		final StringBuilder s = new StringBuilder("INTERNAL REPRESENTATION:\n");
+		final Formatter f = new Formatter(s, Locale.ENGLISH);
+
+		if (isEmpty())
+			return s.append("null\n").toString();
+
+		f.format("Elements: %s\n", toString());
+
+		// elements
+		int firstBitInWord = 0;
+		for (int i = 0; i <= lastWordIndex; i++) {
+			// raw representation of words[i]
+			f.format("words[%d] = ", i);
+			String ws = toBinaryString(words.get(i));
+			if (isLiteral(words.get(i))) {
+				s.append(ws.substring(0, 1));
+				s.append("--");
+				s.append(ws.substring(1));
+			} else {
+				s.append(ws.substring(0, 2));
+				s.append('-');
+				if (simulateWAH)
+					s.append("xxxxx");
+				else
+					s.append(ws.substring(2, 7));
+				s.append('-');
+				s.append(ws.substring(7));
+			}
+			s.append(" --> ");
+
+			// decode words[i]
+			if (isLiteral(words.get(i))) {
+				// literal
+				s.append("literal: ");
+				s.append(toBinaryString(words.get(i)).substring(1));
+				f.format(" ---> [from %d to %d] ", firstBitInWord, firstBitInWord + MAX_LITERAL_LENGHT - 1);
+				firstBitInWord += MAX_LITERAL_LENGHT;
+			} else {
+				// sequence
+				if (isOneSequence(words.get(i))) {
+					s.append('1');
+				} else {
+					s.append('0');
+				}
+				s.append(" block: ");
+				s.append(toBinaryString(getLiteralBits(getLiteral(words.get(i)))).substring(1));
+				if (!simulateWAH) {
+					s.append(" (bit=");
+					int bit = (words.get(i) & 0x3E000000) >>> 25;
+					if (bit == 0)
+						s.append("none");
+					else
+						s.append(String.format("%4d", bit - 1));
+					s.append(')');
+				}
+				int count = getSequenceCount(words.get(i));
+				f.format(" followed by %d blocks (%d bits)",
+						getSequenceCount(words.get(i)),
+						maxLiteralLengthMultiplication(count));
+				f.format(" ---> [from %d to %d] ", firstBitInWord, firstBitInWord + (count + 1) * MAX_LITERAL_LENGHT - 1);
+				firstBitInWord += (count + 1) * MAX_LITERAL_LENGHT;
+			}
+			s.append('\n');
+		}
+
+		// object attributes
+		f.format("simulateWAH: %b\n", simulateWAH);
+		f.format("last: %d\n", last);
+		f.format("size: %s\n", (size == -1 ? "invalid" : Integer.toString(size)));
+		f.format("words.length: %d\n", words.capacity());
+		f.format("lastWordIndex: %d\n", lastWordIndex);
+
+		// compression
+		f.format("bitmap compression: %.2f%%\n", 100D * bitmapCompressionRatio());
+		f.format("collection compression: %.2f%%\n", 100D * collectionCompressionRatio());
+
+		return s.toString();
+	}
 }

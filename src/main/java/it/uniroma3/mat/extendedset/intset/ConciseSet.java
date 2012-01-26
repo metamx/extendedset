@@ -14,7 +14,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
 package it.uniroma3.mat.extendedset.intset;
@@ -56,7 +56,7 @@ import java.util.SortedSet;
  * best-effort basis. Therefore, it would be wrong to write a program that
  * depended on this exception for its correctness: <i>the fail-fast behavior of
  * iterators should be used only to detect bugs.</i>
- * 
+ *
  * @author Alessandro Colantonio
  * @version $Id$
  */
@@ -93,25 +93,25 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	/**
 	 * Cached cardinality of the bit-set. Defined for efficient {@link #size()}
 	 * calls. When -1, the cache is invalid.
-	 */ 
+	 */
 	private transient int size;
 
 	/**
 	 * Index of the last word in {@link #words}
-	 */ 
+	 */
 	private transient int lastWordIndex;
 
 	/**
 	 * <code>true</code> if the class must simulate the behavior of WAH
 	 */
 	private final boolean simulateWAH;
-	
+
 	/**
 	 * User for <i>fail-fast</i> iterator. It counts the number of operations
 	 * that <i>do</i> modify {@link #words}
 	 */
 	protected transient volatile int modCount = 0;
-	
+
 	/**
 	 * The highest representable integer.
 	 * <p>
@@ -121,7 +121,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * Indeed, at least one literal exists, and the other bits may all be 0's or
 	 * 1's, that is <tt>{@link Integer#MAX_VALUE} - 31</tt>. If we use:
 	 * <ul>
-	 * <li> 2 bits for the sequence type; 
+	 * <li> 2 bits for the sequence type;
 	 * <li> 5 bits to indicate which bit is set;
 	 * </ul>
 	 * then <tt>32 - 5 - 2 = 25</tt> is the number of available bits to
@@ -132,12 +132,12 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 */
 	public final static int MAX_ALLOWED_INTEGER = 31 * (1 << 25) + 30; // 1040187422
 
-	/** 
+	/**
 	 * The lowest representable integer.
 	 */
 	public final static int MIN_ALLOWED_SET_BIT = 0;
-	
-	/** 
+
+	/**
 	 * Maximum number of representable bits within a literal
 	 */
 	private final static int MAX_LITERAL_LENGHT = 31;
@@ -146,17 +146,17 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * Literal that represents all bits set to 1 (and MSB = 1)
 	 */
 	private final static int ALL_ONES_LITERAL = 0xFFFFFFFF;
-	
+
 	/**
 	 * Literal that represents all bits set to 0 (and MSB = 1)
 	 */
 	private final static int ALL_ZEROS_LITERAL = 0x80000000;
-	
+
 	/**
 	 * All bits set to 1 and MSB = 0
 	 */
 	private final static int ALL_ONES_WITHOUT_MSB = 0x7FFFFFFF;
-	
+
 	/**
 	 * Sequence bit
 	 */
@@ -164,7 +164,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Resets to an empty set
-	 * 
+	 *
 	 * @see #ConciseSet()
 	 * {@link #clear()}
 	 */
@@ -185,7 +185,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Creates an empty integer set
-	 * 
+	 *
 	 * @param simulateWAH
 	 *            <code>true</code> if the class must simulate the behavior of
 	 *            WAH
@@ -222,7 +222,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * <p>
 	 * See <a
 	 * href="http://graphics.stanford.edu/~seander/bithacks.html">http://graphics.stanford.edu/~seander/bithacks.html</a>
-	 * 
+	 *
 	 * @param n
 	 *            number to divide
 	 * @return <code>n % 31</code>
@@ -250,7 +250,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Calculates the multiplication by 31 in a faster way than using <code>n * 31</code>
-	 * 
+	 *
 	 * @param n
 	 *            number to multiply
 	 * @return <code>n * 31</code>
@@ -261,7 +261,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Calculates the division by 31
-	 * 
+	 *
 	 * @param n
 	 *            number to divide
 	 * @return <code>n / 31</code>
@@ -272,7 +272,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Checks whether a word is a literal one
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return <code>true</code> if the given word is a literal word
@@ -285,7 +285,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Checks whether a word contains a sequence of 1's
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return <code>true</code> if the given word is a sequence of 1's
@@ -297,7 +297,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Checks whether a word contains a sequence of 0's
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return <code>true</code> if the given word is a sequence of 0's
@@ -313,7 +313,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * <p>
 	 * <b>NOTE:</b> when {@link #simulateWAH} is <code>true</code>, it is
 	 * equivalent to (and as fast as) <code>!</code>{@link #isLiteral(int)}
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return <code>true</code> if the given word is a sequence of 0's or 1's
@@ -323,10 +323,10 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		// "word" must be 0?00000*
 		return (word & 0xBE000000) == 0x00000000;
 	}
-	
+
 	/**
 	 * Gets the number of blocks of 1's or 0's stored in a sequence word
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return the number of blocks that follow the first block of 31 bits
@@ -338,7 +338,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Clears the (un)set bit in a sequence
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return the sequence corresponding to the given sequence and with no
@@ -348,7 +348,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		// clear 29 to 25 LSB bits
 		return (word & 0xC1FFFFFF);
 	}
-	
+
 	/**
 	 * Gets the literal word that represents the first 31 bits of the given the
 	 * word (i.e. the first block of a sequence word, or the bits of a literal word).
@@ -356,25 +356,25 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * If the word is a literal, it returns the unmodified word. In case of a
 	 * sequence, it returns a literal that represents the first 31 bits of the
 	 * given sequence word.
-	 * 
+	 *
 	 * @param word
 	 *            word to check
 	 * @return the literal contained within the given word, <i>with the most
 	 *         significant bit set to 1</i>.
 	 */
 	private /*static*/ int getLiteral(int word) {
-		if (isLiteral(word)) 
+		if (isLiteral(word))
 			return word;
-		
+
 		if (simulateWAH)
 			return isZeroSequence(word) ? ALL_ZEROS_LITERAL  : ALL_ONES_LITERAL;
 
 		// get bits from 30 to 26 and use them to set the corresponding bit
 		// NOTE: "1 << (word >>> 25)" and "1 << ((word >>> 25) & 0x0000001F)" are equivalent
 		// NOTE: ">>> 1" is required since 00000 represents no bits and 00001 the LSB bit set
-		int literal = (1 << (word >>> 25)) >>> 1;  
-		return isZeroSequence(word) 
-				? (ALL_ZEROS_LITERAL | literal) 
+		int literal = (1 << (word >>> 25)) >>> 1;
+		return isZeroSequence(word)
+				? (ALL_ZEROS_LITERAL | literal)
 				: (ALL_ONES_LITERAL & ~literal);
 	}
 
@@ -384,7 +384,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * <p>
 	 * Note that the parameter <i>must</i> a sequence word, otherwise the
 	 * result is meaningless.
-	 * 
+	 *
 	 * @param word
 	 *            sequence word to check
 	 * @return the position of the set bit, from 0 to 31. If the sequence has no
@@ -393,12 +393,12 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	private static int getFlippedBit(int word) {
 		// get bits from 30 to 26
 		// NOTE: "-1" is required since 00000 represents no bits and 00001 the LSB bit set
-		return ((word >>> 25) & 0x0000001F) - 1;  
+		return ((word >>> 25) & 0x0000001F) - 1;
 	}
 
 	/**
 	 * Gets the number of set bits within the literal word
-	 * 
+	 *
 	 * @param word
 	 *            literal word
 	 * @return the number of set bits within the literal word
@@ -409,7 +409,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Gets the bits contained within the literal word
-	 * 
+	 *
 	 * @param word literal word
 	 * @return the literal word with the most significant bit cleared
 	 */
@@ -420,7 +420,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	/**
 	 * Clears bits from MSB (excluded, since it indicates the word type) to the
 	 * specified bit (excluded). Last word is supposed to be a literal one.
-	 * 
+	 *
 	 * @param lastSetBit
 	 *            leftmost bit to preserve
 	 */
@@ -431,7 +431,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	/**
 	 * Returns <code>true</code> when the given 31-bit literal string (namely,
 	 * with MSB set) contains only one set bit
-	 * 
+	 *
 	 * @param literal
 	 *            literal word (namely, with MSB unset)
 	 * @return <code>true</code> when the given literal contains only one set
@@ -447,7 +447,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 */
 	private void ensureCapacity(int index) {
 		int capacity = words == null ? 0 : words.length;
-		if (capacity > index) 
+		if (capacity > index)
 			return;
 		capacity = Math.max(capacity << 1, index + 1);
 
@@ -467,22 +467,22 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		if (words != null && ((lastWordIndex + 1) << 1) < words.length)
 			words = Arrays.copyOf(words, lastWordIndex + 1);
 	}
-	
+
 	/**
 	 * Possible operations
 	 */
 	private enum Operator {
 		/**
 		 * @uml.property  name="aND"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		AND {
-			@Override 
+			@Override
 			public int combineLiterals(int literal1, int literal2) {
 				return literal1 & literal2;
 			}
 
-			@Override 
+			@Override
 			public ConciseSet combineEmptySets(ConciseSet op1, ConciseSet op2) {
 				return op1.empty();
 			}
@@ -491,7 +491,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			private ConciseSet oneWayCombineDisjointSets(ConciseSet op1, ConciseSet op2) {
 				// check whether the first operator starts with a sequence that
 				// completely "covers" the second operator
-				if (isSequenceWithNoBits(op1.words[0]) 
+				if (isSequenceWithNoBits(op1.words[0])
 						&& maxLiteralLengthMultiplication(getSequenceCount(op1.words[0]) + 1) > op2.last) {
 					// op2 is completely hidden by op1
 					if (isZeroSequence(op1.words[0]))
@@ -501,7 +501,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				}
 				return null;
 			}
-			
+
 			@Override
 			public ConciseSet combineDisjointSets(ConciseSet op1, ConciseSet op2) {
 				ConciseSet res = oneWayCombineDisjointSets(op1, op2);
@@ -510,18 +510,18 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				return res;
 			}
 		},
-		
+
 		/**
 		 * @uml.property  name="oR"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		OR {
-			@Override 
+			@Override
 			public int combineLiterals(int literal1, int literal2) {
 				return literal1 | literal2;
 			}
 
-			@Override 
+			@Override
 			public ConciseSet combineEmptySets(ConciseSet op1, ConciseSet op2) {
 				if (!op1.isEmpty())
 					return op1.clone();
@@ -529,26 +529,26 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 					return op2.clone();
 				return op1.empty();
 			}
-			
+
 			/** Used to implement {@link #combineDisjointSets(ConciseSet, ConciseSet)} */
 			private ConciseSet oneWayCombineDisjointSets(ConciseSet op1, ConciseSet op2) {
 				// check whether the first operator starts with a sequence that
 				// completely "covers" the second operator
-				if (isSequenceWithNoBits(op1.words[0]) 
+				if (isSequenceWithNoBits(op1.words[0])
 						&& maxLiteralLengthMultiplication(getSequenceCount(op1.words[0]) + 1) > op2.last) {
 					// op2 is completely hidden by op1
 					if (isOneSequence(op1.words[0]))
 						return op1.clone();
 					// op2 is left unchanged, but the rest of op1 must be appended...
-					
+
 					// ... first, allocate sufficient space for the result
 					ConciseSet res = op1.empty();
 					res.words = new int[op1.lastWordIndex + op2.lastWordIndex + 3];
 					res.lastWordIndex = op2.lastWordIndex;
-					
+
 					// ... then, copy op2
 					System.arraycopy(op2.words, 0, res.words, 0, op2.lastWordIndex + 1);
-					
+
 					// ... finally, append op1
 					WordIterator wordIterator = op1.new WordIterator();
 					wordIterator.prepareNext(maxLiteralLengthDivision(op2.last) + 1);
@@ -559,7 +559,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 						res.size = op1.size + op2.size;
 					res.last = op1.last;
 					res.compact();
-					return res;				
+					return res;
 				}
 				return null;
 			}
@@ -575,15 +575,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		/**
 		 * @uml.property  name="xOR"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		XOR {
-			@Override 
+			@Override
 			public int combineLiterals(int literal1, int literal2) {
 				return ALL_ZEROS_LITERAL | (literal1 ^ literal2);
 			}
 
-			@Override 
+			@Override
 			public ConciseSet combineEmptySets(ConciseSet op1, ConciseSet op2) {
 				if (!op1.isEmpty())
 					return op1.clone();
@@ -591,17 +591,17 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 					return op2.clone();
 				return op1.empty();
 			}
-			
+
 			/** Used to implement {@link #combineDisjointSets(ConciseSet, ConciseSet)} */
 			private ConciseSet oneWayCombineDisjointSets(ConciseSet op1, ConciseSet op2) {
 				// check whether the first operator starts with a sequence that
 				// completely "covers" the second operator
-				if (isSequenceWithNoBits(op1.words[0]) 
+				if (isSequenceWithNoBits(op1.words[0])
 						&& maxLiteralLengthMultiplication(getSequenceCount(op1.words[0]) + 1) > op2.last) {
 					// op2 is left unchanged by op1
 					if (isZeroSequence(op1.words[0]))
 						return OR.combineDisjointSets(op1, op2);
-					// op2 must be complemented, then op1 must be appended 
+					// op2 must be complemented, then op1 must be appended
 					// it is better to perform it normally...
 					return null;
 				}
@@ -619,37 +619,37 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		/**
 		 * @uml.property  name="aNDNOT"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		ANDNOT {
-			@Override 
+			@Override
 			public int combineLiterals(int literal1, int literal2) {
 				return ALL_ZEROS_LITERAL | (literal1 & (~literal2));
 			}
 
-			@Override 
+			@Override
 			public ConciseSet combineEmptySets(ConciseSet op1, ConciseSet op2) {
 				if (!op1.isEmpty())
 					return op1.clone();
 				return op1.empty();
 			}
-			
+
 			@Override
 			public ConciseSet combineDisjointSets(ConciseSet op1, ConciseSet op2) {
 				// check whether the first operator starts with a sequence that
 				// completely "covers" the second operator
-				if (isSequenceWithNoBits(op1.words[0]) 
+				if (isSequenceWithNoBits(op1.words[0])
 						&& maxLiteralLengthMultiplication(getSequenceCount(op1.words[0]) + 1) > op2.last) {
 					// op1 is left unchanged by op2
 					if (isZeroSequence(op1.words[0]))
 						return op1.clone();
-					// op2 must be complemented, then op1 must be appended 
+					// op2 must be complemented, then op1 must be appended
 					// it is better to perform it normally...
 					return null;
 				}
 				// check whether the second operator starts with a sequence that
 				// completely "covers" the first operator
-				if (isSequenceWithNoBits(op2.words[0]) 
+				if (isSequenceWithNoBits(op2.words[0])
 						&& maxLiteralLengthMultiplication(getSequenceCount(op2.words[0]) + 1) > op1.last) {
 					// op1 is left unchanged by op2
 					if (isZeroSequence(op2.words[0]))
@@ -664,21 +664,21 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		/**
 		 * Performs the operation on the given literals
-		 * 
+		 *
 		 * @param literal1
 		 *            left operand
 		 * @param literal2
 		 *            right operand
 		 * @return literal representing the result of the specified operation
 		 */
-		public abstract int combineLiterals(int literal1, int literal2); 
-		
+		public abstract int combineLiterals(int literal1, int literal2);
+
 		/**
 		 * Performs the operation when one or both operands are empty set
 		 * <p>
 		 * <b>NOTE: the caller <i>MUST</i> assure that one or both the operands
 		 * are empty!!!</b>
-		 * 
+		 *
 		 * @param op1
 		 *            left operand
 		 * @param op2
@@ -686,13 +686,13 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		 * @return <code>null</code> if both operands are non-empty
 		 */
 		public abstract ConciseSet combineEmptySets(ConciseSet op1, ConciseSet op2);
-		
+
 		/**
 		 * Performs the operation in the special case of "disjoint" sets, namely
 		 * when the first (or the second) operand starts with a sequence (it
 		 * does not matter if 0's or 1's) that completely covers all the bits of
 		 * the second (or the first) operand.
-		 * 
+		 *
 		 * @param op1
 		 *            left operand
 		 * @param op2
@@ -721,9 +721,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * <li> a literal word containing only zeros;
 	 * <li> a sequence of zeros.
 	 * </ul>
-	 * 
+	 *
 	 * @param i
-	 *            the absolute position of the bit to set (i.e., the integer to add) 
+	 *            the absolute position of the bit to set (i.e., the integer to add)
 	 */
 	private void append(int i) {
 		// special case of empty set
@@ -746,7 +746,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			words[lastWordIndex] = ALL_ZEROS_LITERAL | (1 << maxLiteralLengthModulus(i));
 			return;
 		}
-		
+
 		// position of the next bit to set within the current literal
 		int bit = maxLiteralLengthModulus(last) + i - last;
 
@@ -775,10 +775,10 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		if (size >= 0)
 			size++;
 	}
-	
+
 	/**
 	 * Append a literal word after the last word
-	 * 
+	 *
 	 * @param word
 	 *            the new literal word. Note that the leftmost bit <b>must</b>
 	 *            be set to 1.
@@ -797,8 +797,8 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		if (lastWordIndex < 0) {
 			words[lastWordIndex = 0] = word;
 			return;
-		} 
-		
+		}
+
 		final int lastWord = words[lastWordIndex];
 		if (word == ALL_ZEROS_LITERAL) {
 			if (lastWord == ALL_ZEROS_LITERAL)
@@ -825,7 +825,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 	/**
 	 * Append a sequence word after the last word
-	 * 
+	 *
 	 * @param length
 	 *            sequence length
 	 * @param fillType
@@ -834,21 +834,21 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	private void appendFill(int length, int fillType) {
 		assert length > 0;
 		assert lastWordIndex >= -1;
-		
+
 		fillType &= SEQUENCE_BIT;
-		
+
 		// it is actually a literal...
 		if (length == 1) {
 			appendLiteral(fillType == 0 ? ALL_ZEROS_LITERAL : ALL_ONES_LITERAL);
 			return;
-		} 
+		}
 
 		// empty set
 		if (lastWordIndex < 0) {
 			words[lastWordIndex = 0] = fillType | (length - 1);
 			return;
-		} 
-		
+		}
+
 		final int lastWord = words[lastWordIndex];
 		if (isLiteral(lastWord)) {
 			if (fillType == 0 && lastWord == ALL_ZEROS_LITERAL) {
@@ -885,16 +885,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	private class WordIterator {
 		/** copy of the current word */
 		int word;
-		
+
 		/** current word index */
 		int index;
-		
+
 		/** <code>true</code> if {@link #word} is a literal */
 		boolean isLiteral;
-		
+
 		/** number of blocks in the current word (1 for literals, > 1 for sequences) */
 		int count;
-		
+
 		/**
 		 * Initialize data
 		 */
@@ -903,7 +903,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			index = -1;
 			prepareNext();
 		}
-		
+
 		/**
 		 * @return <code>true</code> if there is no current word
 		 */
@@ -919,7 +919,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		 * sequence, namely a literal cannot be skipped. Moreover, the number of
 		 * blocks to skip must be less than the remaining blocks in the current
 		 * sequence.
-		 * 
+		 *
 		 * @param c
 		 *            number of 31-bit "blocks" to skip
 		 * @return <code>false</code> if the next word does not exists
@@ -931,10 +931,10 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				return prepareNext();
 			return true;
 		}
-		
+
 		/**
 		 * Prepare the next value for {@link #word}
-		 * 
+		 *
 		 * @return <code>false</code> if the next word does not exists
 		 */
 		boolean prepareNext() {
@@ -944,7 +944,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				word = getSequenceWithNoBits(words[index]) - 1;
 				return true;
 			}
-			
+
 			index++;
 			if (index > lastWordIndex)
 				return false;
@@ -954,11 +954,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				count = getSequenceCount(word) + 1;
 				if (!simulateWAH && !isSequenceWithNoBits(word)) {
 					isLiteral = true;
-					int bit = (1 << (word >>> 25)) >>> 1;  
-					word = isZeroSequence(word) 
-							? (ALL_ZEROS_LITERAL | bit) 
+					int bit = (1 << (word >>> 25)) >>> 1;
+					word = isZeroSequence(word)
+							? (ALL_ZEROS_LITERAL | bit)
 							: (ALL_ONES_LITERAL & ~bit);
-				} 
+				}
 			} else {
 				count = 1;
 			}
@@ -973,10 +973,10 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			assert !isLiteral;
 			return ALL_ZEROS_LITERAL | ((word << 1) >> MAX_LITERAL_LENGHT);
 		}
-		
+
 		/**
 		 * Copies all the remaining words in the given set
-		 * 
+		 *
 		 * @param s
 		 *            set where the words must be copied
 		 * @return <code>false</code> if there are no words to copy
@@ -985,15 +985,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			// nothing to flush
 			if (exhausted())
 				return false;
-			
+
 			// try to "compress" the first few words
 			do {
-				if (isLiteral) 
+				if (isLiteral)
 					s.appendLiteral(word);
-				else 
+				else
 					s.appendFill(count, word);
 			} while (prepareNext() && s.words[s.lastWordIndex] != word);
-			
+
 			// copy remaining words "as-is"
 			int delta = lastWordIndex - index + 1;
 			System.arraycopy(words, index, s.words, s.lastWordIndex + 1, delta);
@@ -1002,7 +1002,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return true;
 		}
 	}
-	
+
 	/**
 	 * Recalculate a fresh value for {@link ConciseSet#last}
 	 */
@@ -1017,15 +1017,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		}
 
 		int w = words[lastWordIndex];
-		if (isLiteral(w)) 
+		if (isLiteral(w))
 			last -= Integer.numberOfLeadingZeros(getLiteralBits(w));
-		else 
+		else
 			last--;
 	}
-	
+
 	/**
 	 * Performs the given operation over the bit-sets
-	 * 
+	 *
 	 * @param other
 	 *            {@link ConciseSet} instance that represents the right
 	 *            operand
@@ -1035,9 +1035,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 */
 	private ConciseSet performOperation(ConciseSet other, Operator operator) {
 		// non-empty arguments
-		if (this.isEmpty() || other.isEmpty()) 
+		if (this.isEmpty() || other.isEmpty())
 			return operator.combineEmptySets(this, other);
-		
+
 		// if the two operands are disjoint, the operation is faster
 		ConciseSet res = operator.combineDisjointSets(this, other);
 		if (res != null)
@@ -1052,9 +1052,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		// before compacting.
 		res = empty();
 		res.words = new int[1 + Math.min(
-				this.lastWordIndex + other.lastWordIndex + 2, 
+				this.lastWordIndex + other.lastWordIndex + 2,
 				maxLiteralLengthDivision(Math.max(this.last, other.last)) << (simulateWAH ? 1 : 0))];
-		
+
 		// scan "this" and "other"
 		WordIterator thisItr = new WordIterator();
 		WordIterator otherItr = other.new WordIterator();
@@ -1088,7 +1088,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		boolean invalidLast = true;
 
 		// if one bit string is greater than the other one, we add the remaining
-		// bits depending on the given operation. 
+		// bits depending on the given operation.
 		switch (operator) {
 		case AND:
 			break;
@@ -1121,7 +1121,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return res;
 
 		// compute the greatest element
-		if (invalidLast) 
+		if (invalidLast)
 			res.updateLast();
 
 		// compact the memory
@@ -1129,37 +1129,37 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		return res;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
 	@Override
 	public int intersectionSize(IntSet o) {
 		// special cases
-		if (isEmpty() || o == null || o.isEmpty()) 
+		if (isEmpty() || o == null || o.isEmpty())
 			return 0;
 		if (this == o)
 			return size();
 
 		final ConciseSet other = convert(o);
-		
+
 		// check whether the first operator starts with a sequence that
 		// completely "covers" the second operator
-		if (isSequenceWithNoBits(this.words[0]) 
+		if (isSequenceWithNoBits(this.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(this.words[0]) + 1) > other.last) {
 			if (isZeroSequence(this.words[0]))
 				return 0;
 			return other.size();
 		}
-		if (isSequenceWithNoBits(other.words[0]) 
+		if (isSequenceWithNoBits(other.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(other.words[0]) + 1) > this.last) {
 			if (isZeroSequence(other.words[0]))
 				return 0;
 			return this.size();
 		}
-		
+
 		int res = 0;
-		
+
 		// scan "this" and "other"
 		WordIterator thisItr = new WordIterator();
 		WordIterator otherItr = other.new WordIterator();
@@ -1190,8 +1190,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		}
 
 		return res;
-	} 
-	
+	}
+
+  /**
+	 * {@inheritDoc}
+	 */
+  public int[] getCompressedBitmap()
+  {
+    return words;
+  }
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1209,7 +1217,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			if (isLiteral(w)) {
 				// number of bits in the current word
 				setBitsInCurrentWord = getLiteralBitCount(w);
-				
+
 				// check if the desired bit is in the current word
 				if (position < setBitsInCurrentWord) {
 					int currSetBitInWord = -1;
@@ -1217,13 +1225,13 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 						currSetBitInWord = Integer.numberOfTrailingZeros(w & (0xFFFFFFFF << (currSetBitInWord + 1)));
 					return firstSetBitInWord + currSetBitInWord;
 				}
-				
+
 				// skip the 31-bit block
 				firstSetBitInWord += MAX_LITERAL_LENGHT;
 			} else {
 				// number of involved bits (31 * blocks)
 				int sequenceLength = maxLiteralLengthMultiplication(getSequenceCount(w) + 1);
-				
+
 				// check the sequence type
 				if (isOneSequence(w)) {
 					if (simulateWAH || isSequenceWithNoBits(w)) {
@@ -1250,14 +1258,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				// skip the 31-bit blocks
 				firstSetBitInWord += sequenceLength;
 			}
-			
+
 			// update the number of found set bits
 			position -= setBitsInCurrentWord;
 		}
-		
+
 		throw new IndexOutOfBoundsException(Integer.toString(i));
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1297,14 +1305,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 							return -1;
 						return index + BitCount.count(l & ~(0xFFFFFFFF << bitPosition));
 					}
-					
+
 					// if we are in the middle of a sequence of 1's, the bit already exist
-					if (blockIndex > 0 
-							&& blockIndex <= getSequenceCount(w) 
+					if (blockIndex > 0
+							&& blockIndex <= getSequenceCount(w)
 							&& isOneSequence(w))
 						return index + maxLiteralLengthMultiplication(blockIndex) + bitPosition - (isSequenceWithNoBits(w) ? 0 : 1);
 				}
-				
+
 				// next word
 				int blocks = getSequenceCount(w) + 1;
 				blockIndex -= blocks;
@@ -1318,7 +1326,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				}
 			}
 		}
-		
+
 		// not found
 		return -1;
 	}
@@ -1385,15 +1393,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	@Override
 	public void complement() {
 		modCount++;
-		
+
 		if (isEmpty())
 			return;
-		
+
 		if (last == MIN_ALLOWED_SET_BIT) {
 			clear();
 			return;
 		}
-		
+
 		// update size
 		if (size >= 0)
 			size = last - size + 1;
@@ -1401,7 +1409,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		// complement each word
 		for (int i = 0; i <= lastWordIndex; i++) {
 			int w = words[i];
-			if (isLiteral(w)) 
+			if (isLiteral(w))
 				// negate the bits and set the most significant bit to 1
 				words[i] = ALL_ZEROS_LITERAL | ~w;
 			else
@@ -1423,16 +1431,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		int w = 0;
 		for (int i = 0; i <= lastWordIndex; i++) {
 			w = words[i];
-			if (isLiteral(w)) 
+			if (isLiteral(w))
 				last += MAX_LITERAL_LENGHT;
-			else 
+			else
 				last += maxLiteralLengthMultiplication(getSequenceCount(w) + 1);
 		}
 
 		// manage the last word (that must be a literal or a sequence of 1's)
-		if (isLiteral(w)) 
+		if (isLiteral(w))
 			last -= Integer.numberOfLeadingZeros(getLiteralBits(w));
-		else 
+		else
 			last--;
 	}
 
@@ -1464,7 +1472,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 		} while (true);
 	}
-	
+
 	/**
 	 * Iterator over the bits of a single literal/fill word
 	 */
@@ -1477,7 +1485,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		public void skipAllBefore(int i);
 		public void reset(int offset, int word, boolean fromBeginning);
 	}
-	
+
 	/**
 	 * Iterator over the bits of literal and zero-fill words
 	 */
@@ -1485,7 +1493,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		final int[] buffer = new int[MAX_LITERAL_LENGHT];
 		int len = 0;
 		int current = 0;
-		
+
 		@Override public boolean hasNext() {
 			return current < len;
 		}
@@ -1515,11 +1523,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			while (hasNext() && buffer[current] < i)
 				current++;
 		}
-		
+
 		@Override public void reset(int offset, int word, boolean fromBeginning) {
 			if (isLiteral(word)) {
 				len = 0;
-				for (int i = 0; i < MAX_LITERAL_LENGHT; i++) 
+				for (int i = 0; i < MAX_LITERAL_LENGHT; i++)
 					if ((word & (1 << i)) != 0)
 						buffer[len++] = offset + i;
 				current = fromBeginning ? 0 : len;
@@ -1539,7 +1547,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 		}
 	}
-	
+
 	/**
 	 * Iterator over the bits of one-fill words
 	 */
@@ -1548,7 +1556,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		int lastInt = -1;
 		int current = 0;
 		int exception = -1;
-		
+
 		@Override public boolean hasNext() {
 			return current < lastInt;
 		}
@@ -1586,7 +1594,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				return;
 			current = i - 1;
 		}
-		
+
 		@Override public void reset(int offset, int word, boolean fromBeginning) {
 			if (!isOneSequence(word))
 				throw new RuntimeException("NOT a sequence of ones!");
@@ -1602,34 +1610,34 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			current = fromBeginning ? (firstInt - 1) : (lastInt + 1);
 		}
 	}
-	
+
 	/**
 	 * Iterator for all the integers of a  {@link ConciseSet}  instance
 	 */
 	private class BitIterator implements IntIterator {
 		/**
 		 * @uml.property  name="litExp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		final LiteralAndZeroFillExpander litExp = new LiteralAndZeroFillExpander();
 		/**
 		 * @uml.property  name="oneExp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		final OneFillExpander oneExp = new OneFillExpander();
 		/**
 		 * @uml.property  name="exp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		WordExpander exp;
 		int nextIndex = 0;
 		int nextOffset = 0;
-		
+
 		private void nextWord() {
 			final int word = words[nextIndex++];
 			exp = isOneSequence(word) ? oneExp : litExp;
 			exp.reset(nextOffset, word, true);
-			
+
 			// prepare next offset
 			if (isLiteral(word)) {
 				nextOffset += MAX_LITERAL_LENGHT;
@@ -1637,11 +1645,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				nextOffset += maxLiteralLengthMultiplication(getSequenceCount(word) + 1);
 			}
 		}
-		
+
 		private BitIterator () {
 			nextWord();
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return nextIndex <= lastWordIndex || exp.hasNext();
@@ -1672,30 +1680,30 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 		}
 	}
-	
+
 	/**
 	 * @author  alessandrocolantonio
 	 */
 	private class ReverseBitIterator implements IntIterator {
 		/**
 		 * @uml.property  name="litExp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		final LiteralAndZeroFillExpander litExp = new LiteralAndZeroFillExpander();
 		/**
 		 * @uml.property  name="oneExp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		final OneFillExpander oneExp = new OneFillExpander();
 		/**
 		 * @uml.property  name="exp"
-		 * @uml.associationEnd  
+		 * @uml.associationEnd
 		 */
 		WordExpander exp;
 		int nextIndex = lastWordIndex;
 		int nextOffset = maxLiteralLengthMultiplication(maxLiteralLengthDivision(last) + 1);
 		int firstIndex; // first non-zero block
-		
+
 		void previousWord() {
 			final int word = words[nextIndex--];
 			exp = isOneSequence(word) ? oneExp : litExp;
@@ -1706,7 +1714,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 			exp.reset(nextOffset, word, false);
 		}
-		
+
 		ReverseBitIterator() {
 			// identify the first non-zero block
 			if ((isSequenceWithNoBits(words[0]) && isZeroSequence(words[0])) || (isLiteral(words[0]) && words[0] == ALL_ZEROS_LITERAL))
@@ -1715,7 +1723,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				firstIndex = 0;
 			previousWord();
 		}
-		
+
 		@Override
 		public boolean hasNext() {
 			return nextIndex >= firstIndex || exp.hasPrevious();
@@ -1778,7 +1786,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		}
 		return new ReverseBitIterator();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1792,7 +1800,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 */
 	@Override
 	public int last() {
-		if (isEmpty()) 
+		if (isEmpty())
 			throw new NoSuchElementException();
 		return last;
 	}
@@ -1808,7 +1816,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		ConciseSet res = empty();
 		IntIterator itr = c.iterator();
-		while (itr.hasNext()) 
+		while (itr.hasNext())
 			res.add(itr.next());
 		return res;
 	}
@@ -1828,7 +1836,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		}
 		return res;
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1854,7 +1862,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * Replace the current instance with another {@link ConciseSet} instance. It
 	 * also returns <code>true</code> if the given set is actually different
 	 * from the current one
-	 * 
+	 *
 	 * @param other
 	 *            {@link ConciseSet} instance to use to replace the current one
 	 * @return <code>true</code> if the given set is different from the current
@@ -1863,18 +1871,18 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	private boolean replaceWith(ConciseSet other) {
 		if (this == other)
 			return false;
-		
+
 		boolean isSimilar = (this.lastWordIndex == other.lastWordIndex)
 			&& (this.last == other.last);
 		for (int i = 0; isSimilar && (i <= lastWordIndex); i++)
-			isSimilar &= this.words[i] == other.words[i]; 
+			isSimilar &= this.words[i] == other.words[i];
 
 		if (isSimilar) {
 			if (other.size >= 0)
 				this.size = other.size;
 			return false;
 		}
-		
+
 		this.words = other.words;
 		this.size = other.size;
 		this.last = other.last;
@@ -1914,16 +1922,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 					// bit already set
 					if ((w & (1 << bitPosition)) != 0)
 						return false;
-					
+
 					// By adding the bit we potentially create a sequence:
 					// -- If the literal is made up of all zeros, it definitely
 					//    cannot be part of a sequence (otherwise it would not have
 					//    been created). Thus, we can create a 1-bit literal word
-					// -- If there are MAX_LITERAL_LENGHT - 2 set bits, by adding 
-					//    the new one we potentially allow for a 1's sequence 
+					// -- If there are MAX_LITERAL_LENGHT - 2 set bits, by adding
+					//    the new one we potentially allow for a 1's sequence
 					//    together with the successive word
-					// -- If there are MAX_LITERAL_LENGHT - 1 set bits, by adding 
-					//    the new one we potentially allow for a 1's sequence 
+					// -- If there are MAX_LITERAL_LENGHT - 1 set bits, by adding
+					//    the new one we potentially allow for a 1's sequence
 					//    together with the successive and/or the preceding words
 					if (!simulateWAH) {
 						int bitCount = getLiteralBitCount(w);
@@ -1933,14 +1941,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 						if (containsOnlyOneBit(~w) || w == ALL_ONES_LITERAL)
 							break;
 					}
-						
+
 					// set the bit
 					words[i] |= 1 << bitPosition;
 					if (size >= 0)
 						size++;
 					return true;
-				} 
-				
+				}
+
 				blockIndex--;
 			} else {
 				if (simulateWAH) {
@@ -1949,13 +1957,13 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				} else {
 					// if we are at the beginning of a sequence, and it is
 					// a set bit, the bit already exists
-					if (blockIndex == 0 
+					if (blockIndex == 0
 							&& (getLiteral(w) & (1 << bitPosition)) != 0)
 						return false;
-					
+
 					// if we are in the middle of a sequence of 1's, the bit already exist
-					if (blockIndex > 0 
-							&& blockIndex <= getSequenceCount(w) 
+					if (blockIndex > 0
+							&& blockIndex <= getSequenceCount(w)
 							&& isOneSequence(w))
 						return false;
 				}
@@ -1964,7 +1972,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				blockIndex -= getSequenceCount(w) + 1;
 			}
 		}
-		
+
 		// the bit is in the middle of a sequence or it may cause a literal to
 		// become a sequence, thus the "easiest" way to add it is by ORing
 		return replaceWith(performOperation(convert(e), Operator.OR));
@@ -1981,9 +1989,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return false;
 
 		// the element cannot exist
-		if (o > last) 
+		if (o > last)
 			return false;
-		
+
 		// check if the element can be removed from a literal word
 		int blockIndex = maxLiteralLengthDivision(o);
 		int bitPosition = maxLiteralLengthModulus(o);
@@ -1995,16 +2003,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 					// the bit is already unset
 					if ((w & (1 << bitPosition)) == 0)
 						return false;
-					
+
 					// By removing the bit we potentially create a sequence:
 					// -- If the literal is made up of all ones, it definitely
 					//    cannot be part of a sequence (otherwise it would not have
 					//    been created). Thus, we can create a 30-bit literal word
 					// -- If there are 2 set bits, by removing the specified
-					//    one we potentially allow for a 1's sequence together with 
+					//    one we potentially allow for a 1's sequence together with
 					//    the successive word
-					// -- If there is 1 set bit, by removing the new one we 
-					//    potentially allow for a 0's sequence 
+					// -- If there is 1 set bit, by removing the new one we
+					//    potentially allow for a 0's sequence
 					//    together with the successive and/or the preceding words
 					if (!simulateWAH) {
 						int bitCount = getLiteralBitCount(w);
@@ -2015,19 +2023,19 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 						if (l == 0 || containsOnlyOneBit(l))
 							break;
 					}
-						
+
 					// unset the bit
 					words[i] &= ~(1 << bitPosition);
 					if (size >= 0)
 						size--;
-					
+
 					// if the bit is the maximal element, update it
 					if (o == last) {
-						last -= maxLiteralLengthModulus(last) - (MAX_LITERAL_LENGHT 
+						last -= maxLiteralLengthModulus(last) - (MAX_LITERAL_LENGHT
 								- Integer.numberOfLeadingZeros(getLiteralBits(words[i])));
 					}
 					return true;
-				} 
+				}
 
 				blockIndex--;
 			} else {
@@ -2037,22 +2045,22 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				} else {
 					// if we are at the beginning of a sequence, and it is
 					// an unset bit, the bit does not exist
-					if (blockIndex == 0 
+					if (blockIndex == 0
 							&& (getLiteral(w) & (1 << bitPosition)) == 0)
 						return false;
-					
+
 					// if we are in the middle of a sequence of 0's, the bit does not exist
-					if (blockIndex > 0 
-							&& blockIndex <= getSequenceCount(w) 
+					if (blockIndex > 0
+							&& blockIndex <= getSequenceCount(w)
 							&& isZeroSequence(w))
 						return false;
 				}
-				
+
 				// next word
 				blockIndex -= getSequenceCount(w) + 1;
 			}
 		}
-		
+
 		// the bit is in the middle of a sequence or it may cause a literal to
 		// become a sequence, thus the "easiest" way to remove it by ANDNOTing
 		return replaceWith(performOperation(convert(o), Operator.ANDNOT));
@@ -2076,7 +2084,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			case 0x80000000:	// LITERAL
 			case 0xC0000000:	// LITERAL
 				// check if the current literal word is the "right" one
-				if (block == 0) 
+				if (block == 0)
 					return (w & (1 << bit)) != 0;
 				block--;
 				break;
@@ -2098,7 +2106,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				break;
 			}
 		}
-		
+
 		// no more words
 		return false;
 	}
@@ -2118,21 +2126,21 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return false;
 		if (size >= 0 && other.size > size)
 			return false;
-		if (other.size == 1) 
+		if (other.size == 1)
 			return contains(other.last);
 
 		// check whether the first operator starts with a sequence that
 		// completely "covers" the second operator
-		if (isSequenceWithNoBits(this.words[0]) 
+		if (isSequenceWithNoBits(this.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(this.words[0]) + 1) > other.last) {
 			if (isZeroSequence(this.words[0]))
 				return false;
 			return true;
 		}
-		if (isSequenceWithNoBits(other.words[0]) 
+		if (isSequenceWithNoBits(other.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(other.words[0]) + 1) > this.last)
 			return false;
-		
+
 		// scan "this" and "other"
 		WordIterator thisItr = new WordIterator();
 		WordIterator otherItr = other.new WordIterator();
@@ -2152,7 +2160,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 					thisItr.word--;
 					if (!otherItr.prepareNext())
 						return true;
-					if (!thisItr.prepareNext(1)) 
+					if (!thisItr.prepareNext(1))
 						return false;
 				}
 			} else if (!otherItr.isLiteral) {
@@ -2184,19 +2192,19 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return true;
 		if (isEmpty())
 			return false;
-		
+
 		final ConciseSet other = convert(c);
 		if (other.size == 1)
 			return contains(other.last);
 
 		// disjoint sets
-		if (isSequenceWithNoBits(this.words[0]) 
+		if (isSequenceWithNoBits(this.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(this.words[0]) + 1) > other.last) {
 			if (isZeroSequence(this.words[0]))
 				return false;
 			return true;
 		}
-		if (isSequenceWithNoBits(other.words[0]) 
+		if (isSequenceWithNoBits(other.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(other.words[0]) + 1) > this.last) {
 			if (isZeroSequence(other.words[0]))
 				return false;
@@ -2256,15 +2264,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return contains(other.last);
 		if (minElements == 1 && size == 1)
 			return other.contains(last);
-		
+
 		// disjoint sets
-		if (isSequenceWithNoBits(this.words[0]) 
+		if (isSequenceWithNoBits(this.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(this.words[0]) + 1) > other.last) {
 			if (isZeroSequence(this.words[0]))
 				return false;
 			return true;
 		}
-		if (isSequenceWithNoBits(other.words[0]) 
+		if (isSequenceWithNoBits(other.words[0])
 				&& maxLiteralLengthMultiplication(getSequenceCount(other.words[0]) + 1) > this.last) {
 			if (isZeroSequence(other.words[0]))
 				return false;
@@ -2312,7 +2320,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 		}
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -2334,18 +2342,18 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			clear();
 			return true;
 		}
-		
+
 		ConciseSet other = convert(c);
 		if (other.size == 1) {
 			if (contains(other.last)) {
-				if (size == 1) 
+				if (size == 1)
 					return false;
 				return replaceWith(convert(other.last));
-			} 
+			}
 			clear();
 			return true;
 		}
-		
+
 		return replaceWith(performOperation(other, Operator.AND));
 	}
 
@@ -2359,9 +2367,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return false;
 
 		ConciseSet other = convert(c);
-		if (other.size == 1) 
+		if (other.size == 1)
 			return add(other.last);
-		
+
 		return replaceWith(performOperation(convert(c), Operator.OR));
 	}
 
@@ -2380,9 +2388,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		}
 
 		ConciseSet other = convert(c);
-		if (other.size == 1) 
+		if (other.size == 1)
 			return remove(other.last);
-		
+
 		return replaceWith(performOperation(convert(c), Operator.ANDNOT));
 	}
 
@@ -2440,11 +2448,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return true;
 		if (!(obj instanceof ConciseSet))
 			return super.equals(obj);
-		
+
 		final ConciseSet other = (ConciseSet) obj;
 		if (simulateWAH != other.simulateWAH)
 			return super.equals(obj);
-		
+
 		if (size() != other.size())
 			return false;
 		if (isEmpty())
@@ -2469,14 +2477,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return -1;
 		if (o.isEmpty())
 			return 1;
-		
+
 		final ConciseSet other = convert(o);
-		
+
 		// the word at the end must be the same
 		int res = this.last - other.last;
 		if (res != 0)
 			return res < 0 ? -1 : 1;
-		
+
 		// scan words from MSB to LSB
 		int thisIndex = this.lastWordIndex;
 		int otherIndex = other.lastWordIndex;
@@ -2485,7 +2493,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		while (thisIndex >= 0 && otherIndex >= 0) {
 			if (!isLiteral(thisWord)) {
 				if (!isLiteral(otherWord)) {
-					// compare two sequences 
+					// compare two sequences
 					// note that they are made up of at least two blocks, and we
 					// start comparing from the end, that is at blocks with no
 					// (un)set bits
@@ -2559,7 +2567,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				if (--otherIndex >= 0)
 					otherWord = other.words[otherIndex];
 			}
-		}			
+		}
 		return thisIndex >= 0 ? 1 : (otherIndex >= 0 ? -1 : 0);
 	}
 
@@ -2586,9 +2594,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		ConciseSet toRemove = empty();
 		toRemove.add(from);
 		toRemove.complement();
-		
+
 		toAdd.removeAll(toRemove);
-		
+
 		this.addAll(toAdd);
 	}
 
@@ -2600,7 +2608,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		if (!add(e))
 			remove(e);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -2610,7 +2618,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			return 0D;
 		return (lastWordIndex + 1) / Math.ceil((1 + last) / 32D);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -2624,10 +2632,10 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	/*
 	 * DEBUGGING METHODS
 	 */
-	
+
 	/**
 	 * Generates the 32-bit binary representation of a given word (debug only)
-	 * 
+	 *
 	 * @param word
 	 *            word to represent
 	 * @return 32-character string that represents the given word
@@ -2635,11 +2643,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	private static String toBinaryString(int word) {
 		String lsb = Integer.toBinaryString(word);
 		StringBuilder pad = new StringBuilder();
-		for (int i = lsb.length(); i < 32; i++) 
+		for (int i = lsb.length(); i < 32; i++)
 			pad.append('0');
 		return pad.append(lsb).toString();
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -2650,9 +2658,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 
 		if (isEmpty())
 			return s.append("null\n").toString();
-		
+
 		f.format("Elements: %s\n", toString());
-		
+
 		// elements
 		int firstBitInWord = 0;
 		for (int i = 0; i <= lastWordIndex; i++) {
@@ -2694,14 +2702,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 				if (!simulateWAH) {
 					s.append(" (bit=");
 					int bit = (words[i] & 0x3E000000) >>> 25;
-					if (bit == 0) 
+					if (bit == 0)
 						s.append("none");
-					else 
+					else
 						s.append(String.format("%4d", bit - 1));
 					s.append(')');
 				}
 				int count = getSequenceCount(words[i]);
-				f.format(" followed by %d blocks (%d bits)", 
+				f.format(" followed by %d blocks (%d bits)",
 						getSequenceCount(words[i]),
 						maxLiteralLengthMultiplication(count));
 				f.format(" ---> [from %d to %d] ", firstBitInWord, firstBitInWord + (count + 1) * MAX_LITERAL_LENGHT - 1);
@@ -2709,7 +2717,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 			}
 			s.append('\n');
 		}
-		
+
 		// object attributes
 		f.format("simulateWAH: %b\n", simulateWAH);
 		f.format("last: %d\n", last);
@@ -2725,7 +2733,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	}
 
 	/**
-	 * Save the state of the instance to a stream 
+	 * Save the state of the instance to a stream
 	 */
     private void writeObject(ObjectOutputStream s) throws IOException {
     	if (words != null && lastWordIndex < words.length - 1)
@@ -2735,7 +2743,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
     }
 
 	/**
-	 * Reconstruct the instance from a stream 
+	 * Reconstruct the instance from a stream
 	 */
     private void readObject(ObjectInputStream s) throws IOException, ClassNotFoundException {
 		s.defaultReadObject();
