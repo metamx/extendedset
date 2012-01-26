@@ -583,7 +583,6 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   public int get(int i)
   {
     if (i < 0) {
-    if (i < 0) {
       throw new IndexOutOfBoundsException();
     }
 
