@@ -573,7 +573,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
    */
   public IntBuffer getCompressedBitmap()
   {
-    return words;
+    return words.asReadOnlyBuffer();
   }
 
   /**
@@ -582,6 +582,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   @Override
   public int get(int i)
   {
+    if (i < 0) {
     if (i < 0) {
       throw new IndexOutOfBoundsException();
     }

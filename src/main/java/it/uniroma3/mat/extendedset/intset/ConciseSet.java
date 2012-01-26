@@ -25,6 +25,7 @@ import it.uniroma3.mat.extendedset.utilities.BitCount;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1200,6 +1201,18 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
     return words;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public ByteBuffer getCompressedBitmapAsByteBuffer()
+  {
+    ByteBuffer bufferToWrite = ByteBuffer.allocate(words.length * 4);
+    for (int i : words) {
+      bufferToWrite.putInt(i);
+    }
+    return bufferToWrite;
+  }
+  
 	/**
 	 * {@inheritDoc}
 	 */
