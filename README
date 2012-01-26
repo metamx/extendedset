@@ -1,5 +1,4 @@
-<h1>CONCISE (COmpressed 'N' Composable Integer SEt) library</h1>
-<p>This library was written by <a href="http://ricerca.mat.uniroma3.it/users/colanton/concise.html">Alessandro Colantonio</a>.</p>
-<h2>Rationale</h2>
+CONCISE (COmpressed 'N' Composable Integer SEt) library
+This library was written by Alessandro Colantonio - http://ricerca.mat.uniroma3.it/users/colanton/concise.html
 
-<p>This repository is extends the functionality of <code>ConciseSet</code>) to use IntBuffers.
+This repository is extends the functionality of ConciseSet to use IntBuffers.
