@@ -14,10 +14,10 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */ 
+ */
 
 
-package it.uniroma3.mat.extendedset.test;
+package java.it.uniroma3.mat.extendedset;
 
 import it.uniroma3.mat.extendedset.intset.ArraySet;
 //import it.uniroma3.mat.extendedset.intset.Concise2Set;
