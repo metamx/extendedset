@@ -1198,12 +1198,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
    */
   public ByteBuffer toByteBuffer()
   {
-    ByteBuffer bufferToWrite = ByteBuffer.allocate(words.length * 4);
-    for (int i : words) {
-      bufferToWrite.putInt(i);
-    }
-    bufferToWrite.position(0);
-    return bufferToWrite;
+    ByteBuffer buffer = ByteBuffer.allocate(words.length * 4);
+    buffer.asIntBuffer().put(words);
+    return buffer;
   }
   
 	/**
