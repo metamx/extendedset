@@ -1194,22 +1194,15 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	}
 
   /**
-	 * {@inheritDoc}
-	 */
-  public int[] getCompressedBitmap()
-  {
-    return words;
-  }
-
-  /**
    * {@inheritDoc}
    */
-  public ByteBuffer getCompressedBitmapAsByteBuffer()
+  public ByteBuffer toByteBuffer()
   {
     ByteBuffer bufferToWrite = ByteBuffer.allocate(words.length * 4);
     for (int i : words) {
       bufferToWrite.putInt(i);
     }
+    bufferToWrite.position(0);
     return bufferToWrite;
   }
   

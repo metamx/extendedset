@@ -571,14 +571,6 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   /**
    * {@inheritDoc}
    */
-  public IntBuffer getCompressedBitmap()
-  {
-    return words.asReadOnlyBuffer();
-  }
-
-  /**
-   * {@inheritDoc}
-   */
   @Override
   public int get(int i)
   {
