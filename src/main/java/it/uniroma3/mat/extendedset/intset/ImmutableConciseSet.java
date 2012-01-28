@@ -137,11 +137,16 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     this.simulateWAH = false;
   }
 
-  private ConciseSet toMutableConciseSet()
+  public ConciseSet toMutableConciseSet()
   {
     ConciseSet ret = new ConciseSet();
     ret.addAll(this);
     return ret;
+  }
+
+  public byte[] toBytes()
+  {
+    return toMutableConciseSet().toByteBuffer().array();
   }
 
   /**
