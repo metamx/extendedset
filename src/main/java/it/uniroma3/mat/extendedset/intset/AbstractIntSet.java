@@ -413,9 +413,9 @@ public abstract class AbstractIntSet implements IntSet {
 	 */
 	@Override
 	public String toString() {
-        IntIterator itr = iterator();
-    	if (!itr.hasNext())
-    	    return "[]";
+    IntIterator itr = iterator();
+    if (!itr.hasNext())
+      return "[]";
 
 		StringBuilder sb = new StringBuilder();
 		sb.append('[');

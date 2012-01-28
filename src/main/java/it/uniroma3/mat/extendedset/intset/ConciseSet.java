@@ -1202,7 +1202,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
     buffer.asIntBuffer().put(words);
     return buffer;
   }
-  
+
 	/**
 	 * {@inheritDoc}
 	 */
