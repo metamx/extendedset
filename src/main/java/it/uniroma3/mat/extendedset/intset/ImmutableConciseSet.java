@@ -142,6 +142,17 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   public ImmutableConciseSet(IntBuffer words)
   {
     this.words = words;
+    this.lastWordIndex = this.words.capacity() - 1;
+    this.size = -1;
+    this.simulateWAH = false;
+  }
+
+  public ImmutableConciseSet()
+  {
+		this.words = null;
+		this.last = -1;
+		this.size = 0;
+		this.lastWordIndex = -1;
     this.simulateWAH = false;
   }
 
@@ -163,6 +174,9 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   @Override
   public ImmutableConciseSet clone()
   {
+    if (isEmpty()) {
+      return new ImmutableConciseSet((IntBuffer) null);
+    }
     ImmutableConciseSet res = new ImmutableConciseSet(words.duplicate());
     res.last = last;
     res.lastWordIndex = lastWordIndex;
@@ -1660,7 +1674,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
 	 */
 	@Override
 	public ImmutableConciseSet empty() {
-		throw new UnsupportedOperationException();
+		return new ImmutableConciseSet();
 	}
 
   /**
