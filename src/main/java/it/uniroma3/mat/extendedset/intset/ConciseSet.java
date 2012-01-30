@@ -1204,6 +1204,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
     return buffer;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public int[] getWords()
+  {
+    return words;
+  }
+
 	/**
 	 * {@inheritDoc}
 	 */

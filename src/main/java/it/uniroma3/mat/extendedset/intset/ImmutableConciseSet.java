@@ -131,6 +131,12 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     this.simulateWAH = false;
   }
 
+  public ImmutableConciseSet(ConciseSet conciseSet)
+  {
+    this.words = IntBuffer.wrap(conciseSet.getWords());
+    this.simulateWAH = false;
+  }
+
   public ImmutableConciseSet(IntBuffer words)
   {
     this.words = words;
@@ -155,7 +161,6 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   @Override
   public ImmutableConciseSet clone()
   {
-    // NOTE: do not use super.clone() since it is 10 times slower!
     ImmutableConciseSet res = new ImmutableConciseSet(words.duplicate());
     res.last = last;
     res.lastWordIndex = lastWordIndex;
