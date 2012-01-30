@@ -126,7 +126,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   public ImmutableConciseSet(ByteBuffer byteBuffer)
   {
     this.words = byteBuffer.asIntBuffer();
-    this.lastWordIndex = (this.words.capacity() / 4) - 1;
+    this.lastWordIndex = this.words.capacity() - 1;
     this.size = -1;
     updateLast();
     this.simulateWAH = false;
