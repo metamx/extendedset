@@ -1212,6 +1212,14 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
     return words;
   }
 
+  /**
+   * {@inheritDoc}
+   */
+  public int getLastWordIndex()
+  {
+    return lastWordIndex;
+  }
+
 	/**
 	 * {@inheritDoc}
 	 */
