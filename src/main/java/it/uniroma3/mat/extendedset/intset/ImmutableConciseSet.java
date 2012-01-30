@@ -128,6 +128,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     this.words = byteBuffer.asIntBuffer();
     this.lastWordIndex = this.words.capacity() - 1;
     this.size = -1;
+    updateLast();
     this.simulateWAH = false;
   }
 
@@ -137,6 +138,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     this.words = nullSet ? null : IntBuffer.wrap(conciseSet.getWords());
     this.lastWordIndex = nullSet ? -1 : this.words.capacity() - 1;
     this.size = -1;
+    updateLast();
     this.simulateWAH = false;
   }
 
@@ -145,6 +147,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     this.words = words;
     this.lastWordIndex = this.words.capacity() - 1;
     this.size = -1;
+    updateLast();
     this.simulateWAH = false;
   }
 
@@ -520,6 +523,25 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
     }
   }
 
+  /**
+	 * Recalculate a fresh value for {@link ImmutableConciseSet#last}
+	 */
+	private void updateLast() {
+		last = 0;
+		for (int i = 0; i <= lastWordIndex; i++) {
+			int w = words.get(i);
+			if (isLiteral(w))
+				last += MAX_LITERAL_LENGHT;
+			else
+				last += maxLiteralLengthMultiplication(getSequenceCount(w) + 1);
+		}
+
+		int w = words.get(lastWordIndex);
+		if (isLiteral(w))
+			last -= Integer.numberOfLeadingZeros(getLiteralBits(w));
+		else
+			last--;
+	}
 
   /**
    * {@inheritDoc}
