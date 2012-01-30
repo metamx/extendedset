@@ -175,7 +175,7 @@ public class ImmutableConciseSet extends AbstractIntSet implements java.io.Seria
   public ImmutableConciseSet clone()
   {
     if (isEmpty()) {
-      return new ImmutableConciseSet((IntBuffer) null);
+      return empty();
     }
     ImmutableConciseSet res = new ImmutableConciseSet(words.duplicate());
     res.last = last;
