@@ -199,7 +199,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
   public ConciseSet(int[] words, boolean simulateWAH)
   {
     this.words = words;
-    this.lastWordIndex = words.length - 1;
+    this.lastWordIndex = isEmpty() ? -1 : words.length - 1;
     this.size = -1;
     updateLast();
     this.simulateWAH = simulateWAH;
