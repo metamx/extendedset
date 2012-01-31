@@ -1017,6 +1017,11 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 	 * Recalculate a fresh value for {@link ConciseSet#last}
 	 */
 	private void updateLast() {
+    if (isEmpty()) {
+      last = -1;
+      return;
+    }
+
 		last = 0;
 		for (int i = 0; i <= lastWordIndex; i++) {
 			int w = words[i];
