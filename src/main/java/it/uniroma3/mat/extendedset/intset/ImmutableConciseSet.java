@@ -75,6 +75,22 @@ public class ImmutableConciseSet
     return size;
   }
 
+  @Override
+  public String toString()
+  {
+    return mutableSet.toString();
+  }
+
+  public ImmutableConciseSet clone()
+  {
+    return new ImmutableConciseSet(mutableSet.clone());
+  }
+
+  public int compareTo(ImmutableConciseSet other)
+  {
+    return words.compareTo(other.words);
+  }
+
   private boolean isEmpty()
   {
     return words == null;
