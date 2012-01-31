@@ -15,18 +15,20 @@ public class ImmutableConciseSet
 
   public static ConciseSet union(List<ImmutableConciseSet> sets)
   {
-    ConciseSet retVal = new ConciseSet();
-    for (ImmutableConciseSet set : sets) {
-      retVal = retVal.union(set.toMutableConciseSet());
+    ConciseSet retVal = new ConciseSet(sets.get(0).toMutableConciseSet().getWords(), false);
+    for (int i = 1; i < sets.size(); i++) {
+        retVal = retVal.union(sets.get(i).toMutableConciseSet());
+      
     }
     return retVal;
   }
 
   public static ConciseSet intersection(List<ImmutableConciseSet> sets)
   {
-    ConciseSet retVal = new ConciseSet();
-    for (ImmutableConciseSet set : sets) {
-      retVal = retVal.intersection(set.toMutableConciseSet());
+    ConciseSet retVal = new ConciseSet(sets.get(0).toMutableConciseSet().getWords(), false);
+    for (int i = 1; i < sets.size(); i++) {
+        retVal = retVal.intersection(sets.get(i).toMutableConciseSet());
+
     }
     return retVal;
   }
