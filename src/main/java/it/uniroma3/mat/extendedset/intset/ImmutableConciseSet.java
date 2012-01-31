@@ -7,10 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 
 public class ImmutableConciseSet
-{
-  private static final ImmutableConciseSet EMPTY_SET = new ImmutableConciseSet((ConciseSet) null);
-
+{  
   private final IntBuffer words;
+  private final int size;
+  
   private final ConciseSet mutableSet;
 
   public static ConciseSet union(List<ImmutableConciseSet> sets)
@@ -26,7 +26,7 @@ public class ImmutableConciseSet
   {
     ConciseSet retVal = new ConciseSet();
     for (ImmutableConciseSet set : sets) {
-      retVal = retVal.union(set.toMutableConciseSet());
+      retVal = retVal.intersection(set.toMutableConciseSet());
     }
     return retVal;
   }
@@ -35,20 +35,23 @@ public class ImmutableConciseSet
   {
     this.words = byteBuffer.asIntBuffer();
     this.mutableSet = toMutableConciseSet();
+    this.size = byteBuffer.capacity() / 4;
   }
 
   public ImmutableConciseSet(ConciseSet conciseSet)
   {
     this.words = conciseSet == null || conciseSet.isEmpty() ? null : IntBuffer.wrap(conciseSet.getWords());
-    this.mutableSet = toMutableConciseSet();
+    this.mutableSet = conciseSet;
+    this.size = conciseSet.size();
   }
 
   public ConciseSet toMutableConciseSet()
   {
-    if (isEmpty()) {
+    return mutableSet;
+    /*if (isEmpty()) {
       return new ConciseSet();
     }
-    return new ConciseSet(words.array(), false);
+    return new ConciseSet(words.array(), false);*/
   }
 
   public byte[] toBytes()
@@ -65,6 +68,11 @@ public class ImmutableConciseSet
     }
 
     return mutableSet.get(i);
+  }
+
+  public int size()
+  {
+    return size;
   }
 
   private boolean isEmpty()
