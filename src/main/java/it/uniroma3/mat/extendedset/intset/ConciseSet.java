@@ -196,6 +196,12 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
 		reset();
 	}
 
+  public ConciseSet(int[] words, boolean simulateWAH)
+  {
+    this.words = words;
+    this.simulateWAH = simulateWAH;
+  }
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -1196,27 +1202,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
   /**
    * {@inheritDoc}
    */
-  public ByteBuffer toByteBuffer()
-  {
-    ByteBuffer buffer = ByteBuffer.allocate((lastWordIndex + 1) * 4);
-    buffer.asIntBuffer().put(Arrays.copyOf(words, lastWordIndex + 1));
-    return buffer;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
   public int[] getWords()
   {
     return words;
-  }
-
-  /**
-   * {@inheritDoc}
-   */
-  public int getLastWordIndex()
-  {
-    return lastWordIndex;
   }
 
 	/**
