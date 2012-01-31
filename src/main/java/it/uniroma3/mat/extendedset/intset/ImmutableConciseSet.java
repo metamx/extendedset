@@ -36,8 +36,8 @@ public class ImmutableConciseSet
   public ImmutableConciseSet(ByteBuffer byteBuffer)
   {
     this.words = byteBuffer.asIntBuffer();
-    this.mutableSet = toMutableConciseSet();
-    this.size = byteBuffer.capacity() / 4;
+    this.mutableSet = new ConciseSet(words.array(), false);
+    this.size = mutableSet.size();
   }
 
   public ImmutableConciseSet(ConciseSet conciseSet)
@@ -58,7 +58,7 @@ public class ImmutableConciseSet
 
   public byte[] toBytes()
   {
-    ByteBuffer buf = ByteBuffer.wrap(new byte[words.remaining() * 4]);
+    ByteBuffer buf = ByteBuffer.wrap(new byte[size * 4]);
     buf.asIntBuffer().put(words);
     return buf.array();
   }
