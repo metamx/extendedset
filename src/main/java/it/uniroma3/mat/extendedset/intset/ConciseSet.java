@@ -1222,7 +1222,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable {
    */
   public int[] getWords()
   {
-    return words;
+    return Arrays.copyOf(words, lastWordIndex + 1);
   }
 
 	/**
