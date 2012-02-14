@@ -901,6 +901,14 @@ public class ImmutableConciseSet
       nextWord();
     }
 
+    private BitIterator(ConciseSetUtils.WordExpander exp, int nextIndex, int nextOffset)
+    {
+      this.exp = exp;
+      this.nextIndex = nextIndex;
+      this.nextOffset = nextOffset;
+      nextWord();
+    }
+
     @Override
     public boolean hasNext()
     {
@@ -943,11 +951,7 @@ public class ImmutableConciseSet
     @Override
     public IntSet.IntIterator clone()
     {
-      BitIterator retVal = new BitIterator();
-      retVal.exp = exp;
-      retVal.nextIndex = nextIndex;
-      retVal.nextOffset = nextOffset;
-      return retVal;
+      return new BitIterator(exp, nextIndex, nextOffset);
     }
 
     private void nextWord()
