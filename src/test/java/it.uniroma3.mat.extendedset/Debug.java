@@ -1501,6 +1501,7 @@ public class Debug {
 				@Override public int next() {int[] c = itr.next(); return toInt(c[0], c[1]);}
 				@Override public void skipAllBefore(int element) {itr.skipAllBefore(toRow(element), toCol(element));}
 				@Override public void remove() {itr.remove();}
+        @Override public IntIterator clone() {throw new UnsupportedOperationException();}
 			};
 		}
 
@@ -1511,6 +1512,7 @@ public class Debug {
 				@Override public int next() {int[] c = itr.next(); return toInt(c[0], c[1]);}
 				@Override public void skipAllBefore(int element) {itr.skipAllBefore(toRow(element), toCol(element));}
 				@Override public void remove() {itr.remove();}
+        @Override public IntIterator clone() {throw new UnsupportedOperationException();}
 			};
 		}
 

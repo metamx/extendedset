@@ -116,7 +116,11 @@ public class ArraySet extends AbstractIntSet {
 				System.arraycopy(elements, next + 1, elements, next, size - next);
 				compact();
 			}
-		};
+      @Override public IntIterator clone()
+      {
+        throw new UnsupportedOperationException();
+      }
+    };
 	}
 
 	/**
@@ -148,6 +152,9 @@ public class ArraySet extends AbstractIntSet {
 				System.arraycopy(elements, next + 1, elements, next, size - next);
 				compact();
 			}
+      @Override public IntIterator clone() {
+        throw new UnsupportedOperationException();
+      }
 		};
 	}
 

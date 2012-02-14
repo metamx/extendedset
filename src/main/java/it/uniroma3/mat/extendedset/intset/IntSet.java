@@ -281,6 +281,12 @@ public interface IntSet extends Cloneable, Comparable<IntSet> {
 		 *            first element to not skip
 		 */
 		public void skipAllBefore(int element);
+
+    /**
+     * Clone the iterator
+     * @return a clone of the IntIterator
+     */
+    public IntIterator clone();
 	}
 
 	/**

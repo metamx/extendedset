@@ -873,6 +873,9 @@ public class ImmutableConciseSet
 
         @Override
         public void remove() {throw new UnsupportedOperationException();}
+
+        @Override
+        public IntSet.IntIterator clone() {throw new UnsupportedOperationException();}
       };
     }
     return new BitIterator();
@@ -935,6 +938,16 @@ public class ImmutableConciseSet
         }
         nextWord();
       }
+    }
+
+    @Override
+    public IntSet.IntIterator clone()
+    {
+      BitIterator retVal = new BitIterator();
+      retVal.exp = exp;
+      retVal.nextIndex = nextIndex;
+      retVal.nextOffset = nextOffset;
+      return retVal;
     }
 
     private void nextWord()

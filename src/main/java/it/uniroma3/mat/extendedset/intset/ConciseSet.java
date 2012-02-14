@@ -1872,6 +1872,16 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
         nextWord();
       }
     }
+
+    @Override
+    public IntIterator clone()
+    {
+      BitIterator retVal = new BitIterator();
+      retVal.exp = exp;
+      retVal.nextIndex = nextIndex;
+      retVal.nextOffset = nextOffset;
+      return retVal;
+    }
   }
 
   /**
@@ -1958,6 +1968,17 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
         previousWord();
       }
     }
+
+    @Override
+    public IntIterator clone()
+    {
+      ReverseBitIterator retVal = new ReverseBitIterator();
+      retVal.exp = exp;
+      retVal.nextIndex = nextIndex;
+      retVal.nextOffset = nextOffset;
+      retVal.firstIndex = firstIndex;
+      return retVal;
+    }
   }
 
   /**
@@ -1980,6 +2001,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
 
         @Override
         public void remove() {throw new UnsupportedOperationException();}
+
+        @Override
+        public IntIterator clone() {throw new UnsupportedOperationException();}
       };
     }
     return new BitIterator();
@@ -2005,6 +2029,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
 
         @Override
         public void remove() {throw new UnsupportedOperationException();}
+
+        @Override
+        public IntIterator clone() {throw new UnsupportedOperationException();}
       };
     }
     return new ReverseBitIterator();
