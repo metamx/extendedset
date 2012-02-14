@@ -331,9 +331,10 @@ public class ConciseSetUtils
     return isLiteral(word) && (Integer.bitCount(word) == 2);
   }
 
-  public static int clearBitsAfterInLastWord(int lastWord, int lastSetBit) {
-		return lastWord &= ALL_ZEROS_LITERAL | (0xFFFFFFFF >>> (31 - lastSetBit));
-	}
+  public static int clearBitsAfterInLastWord(int lastWord, int lastSetBit)
+  {
+    return lastWord &= ALL_ZEROS_LITERAL | (0xFFFFFFFF >>> (31 - lastSetBit));
+  }
 
   public interface WordExpander
   {
@@ -350,6 +351,8 @@ public class ConciseSetUtils
     public void skipAllBefore(int i);
 
     public void reset(int offset, int word, boolean fromBeginning);
+
+    public WordExpander clone();
   }
 
   public static LiteralAndZeroFillExpander newLiteralAndZeroFillExpander()
@@ -437,6 +440,16 @@ public class ConciseSetUtils
           throw new RuntimeException("sequence of ones!");
         }
       }
+    }
+
+    @Override
+    public WordExpander clone()
+    {
+      LiteralAndZeroFillExpander retVal = new LiteralAndZeroFillExpander();
+      System.arraycopy(buffer, 0, retVal.buffer, 0, buffer.length);
+      retVal.len = len;
+      retVal.current = current;
+      return retVal;
     }
   }
 
@@ -529,6 +542,17 @@ public class ConciseSetUtils
       }
 
       current = fromBeginning ? (firstInt - 1) : (lastInt + 1);
+    }
+
+    @Override
+    public WordExpander clone()
+    {
+      OneFillExpander retVal = new OneFillExpander();
+      retVal.firstInt = firstInt;
+      retVal.lastInt = lastInt;
+      retVal.current = current;
+      retVal.exception = exception;
+      return retVal;
     }
   }
 }
