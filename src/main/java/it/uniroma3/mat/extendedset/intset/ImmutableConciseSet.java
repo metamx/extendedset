@@ -951,7 +951,7 @@ public class ImmutableConciseSet
     @Override
     public IntSet.IntIterator clone()
     {
-      return new BitIterator(exp, nextIndex, nextOffset);
+      return new BitIterator(exp.clone(), nextIndex, nextOffset);
     }
 
     private void nextWord()
