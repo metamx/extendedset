@@ -907,15 +907,16 @@ public class ImmutableConciseSet
     private BitIterator(
         ConciseSetUtils.LiteralAndZeroFillExpander litExp,
         ConciseSetUtils.OneFillExpander oneExp,
+        ConciseSetUtils.WordExpander exp,
         int nextIndex,
         int nextOffset
     )
     {
       this.litExp = litExp;
       this.oneExp = oneExp;
+      this.exp = exp;
       this.nextIndex = nextIndex;
       this.nextOffset = nextOffset;
-      nextWord();
     }
 
     @Override
@@ -963,6 +964,7 @@ public class ImmutableConciseSet
       return new BitIterator(
           (ConciseSetUtils.LiteralAndZeroFillExpander) litExp.clone(),
           (ConciseSetUtils.OneFillExpander) oneExp.clone(),
+          exp.clone(),
           nextIndex,
           nextOffset
       );
