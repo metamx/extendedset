@@ -436,7 +436,7 @@ public class ImmutableConciseSet
     // populate priority queue
     while (sets.hasNext()) {
       ImmutableConciseSet set = sets.next();
-      
+
       if (set == null || set.isEmpty()) {
         return new ImmutableConciseSet();
       }
@@ -889,8 +889,8 @@ public class ImmutableConciseSet
   // Based on the ConciseSet implementation by Alessandro Colantonio
   private class BitIterator implements IntSet.IntIterator
   {
-    final ConciseSetUtils.LiteralAndZeroFillExpander litExp = ConciseSetUtils.newLiteralAndZeroFillExpander();
-    final ConciseSetUtils.OneFillExpander oneExp = ConciseSetUtils.newOneFillExpander();
+    final ConciseSetUtils.LiteralAndZeroFillExpander litExp;
+    final ConciseSetUtils.OneFillExpander oneExp;
 
     ConciseSetUtils.WordExpander exp;
     int nextIndex = 0;
@@ -898,12 +898,21 @@ public class ImmutableConciseSet
 
     private BitIterator()
     {
+      litExp = ConciseSetUtils.newLiteralAndZeroFillExpander();
+      oneExp = ConciseSetUtils.newOneFillExpander();
+
       nextWord();
     }
 
-    private BitIterator(ConciseSetUtils.WordExpander exp, int nextIndex, int nextOffset)
+    private BitIterator(
+        ConciseSetUtils.LiteralAndZeroFillExpander litExp,
+        ConciseSetUtils.OneFillExpander oneExp,
+        int nextIndex,
+        int nextOffset
+    )
     {
-      this.exp = exp;
+      this.litExp = litExp;
+      this.oneExp = oneExp;
       this.nextIndex = nextIndex;
       this.nextOffset = nextOffset;
       nextWord();
@@ -951,7 +960,12 @@ public class ImmutableConciseSet
     @Override
     public IntSet.IntIterator clone()
     {
-      return new BitIterator(exp.clone(), nextIndex, nextOffset);
+      return new BitIterator(
+          (ConciseSetUtils.LiteralAndZeroFillExpander) litExp.clone(),
+          (ConciseSetUtils.OneFillExpander) oneExp.clone(),
+          nextIndex,
+          nextOffset
+      );
     }
 
     private void nextWord()
