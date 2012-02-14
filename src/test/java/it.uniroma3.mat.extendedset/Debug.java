@@ -18,11 +18,9 @@
 
 package it.uniroma3.mat.extendedset;
 
-import it.uniroma3.mat.extendedset.ExtendedSet;
 import it.uniroma3.mat.extendedset.ExtendedSet.ExtendedIterator;
 import it.uniroma3.mat.extendedset.intset.AbstractIntSet;
 import it.uniroma3.mat.extendedset.intset.ArraySet;
-//import it.uniroma3.mat.extendedset.intset.Concise2Set;
 import it.uniroma3.mat.extendedset.intset.ConciseSet;
 import it.uniroma3.mat.extendedset.intset.FastSet;
 import it.uniroma3.mat.extendedset.intset.HashIntSet;
@@ -46,6 +44,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+
+//import it.uniroma3.mat.extendedset.intset.Concise2Set;
 
 
 /**

@@ -20,6 +20,7 @@ package it.uniroma3.mat.extendedset.wrappers;
 
 import it.uniroma3.mat.extendedset.ExtendedSet;
 import it.uniroma3.mat.extendedset.intset.ConciseSet;
+import it.uniroma3.mat.extendedset.intset.ConciseSetUtils;
 import it.uniroma3.mat.extendedset.intset.IntSet;
 import it.uniroma3.mat.extendedset.intset.IntSet.IntIterator;
 
@@ -46,7 +47,7 @@ public class LongSet implements Cloneable, Comparable<LongSet>, java.io.Serializ
 	private static final long serialVersionUID = -6165350530254304256L;
 	
 	/** maximum cardinality of each subset */
-	private static int SUBSET_SIZE = ConciseSet.MAX_ALLOWED_INTEGER + 1;
+	private static int SUBSET_SIZE = ConciseSetUtils.MAX_ALLOWED_INTEGER + 1;
 
 	/**
 	 * transaction-item pair indices (from 0 to   {@link #SUBSET_SIZE}   - 1)
