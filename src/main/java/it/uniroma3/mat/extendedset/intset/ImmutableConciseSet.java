@@ -278,19 +278,21 @@ public class ImmutableConciseSet
         // advance everything past the longest ones sequence
         WordHolder nextVal = theQ.peek();
         while (nextVal != null &&
-               nextVal.getIterator().startIndex == itr.startIndex) {
+               nextVal.getIterator().startIndex < itr.wordsWalked) {
           WordHolder entry = theQ.poll();
           int w = entry.getWord();
           WordIterator i = entry.getIterator();
 
-          // if a literal was created from a flip bit, OR it with other literals or literals from flip bits in the same
-          // position
-          if (ConciseSetUtils.isOneSequence(w)) {
-            flipBitLiteral |= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
-          } else if (ConciseSetUtils.isLiteral(w)) {
-            flipBitLiteral |= w;
-          } else {
-            flipBitLiteral |= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+          if (i.startIndex == itr.startIndex) {
+            // if a literal was created from a flip bit, OR it with other literals or literals from flip bits in the same
+            // position
+            if (ConciseSetUtils.isOneSequence(w)) {
+              flipBitLiteral |= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
+            } else if (ConciseSetUtils.isLiteral(w)) {
+              flipBitLiteral |= w;
+            } else {
+              flipBitLiteral |= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+            }
           }
 
           i.advanceTo(itr.wordsWalked);
@@ -473,22 +475,24 @@ public class ImmutableConciseSet
         // extract a literal from the flip bits of the zero sequence
         int flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(word);
 
-        // advance everything past the longest ones sequence
+        // advance everything past the longest zero sequence
         WordHolder nextVal = theQ.peek();
         while (nextVal != null &&
-               nextVal.getIterator().startIndex == itr.startIndex) {
+               nextVal.getIterator().startIndex < itr.wordsWalked) {
           WordHolder entry = theQ.poll();
           int w = entry.getWord();
           WordIterator i = entry.getIterator();
 
-          // if a literal was created from a flip bit, OR it with other literals or literals from flip bits in the same
-          // position
-          if (ConciseSetUtils.isZeroSequence(w)) {
-            flipBitLiteral &= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
-          } else if (ConciseSetUtils.isLiteral(w)) {
-            flipBitLiteral &= w;
-          } else {
-            flipBitLiteral &= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
+          if (i.startIndex == itr.startIndex) {
+            // if a literal was created from a flip bit, AND it with other literals or literals from flip bits in the same
+            // position
+            if (ConciseSetUtils.isZeroSequence(w)) {
+              flipBitLiteral &= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+            } else if (ConciseSetUtils.isLiteral(w)) {
+              flipBitLiteral &= w;
+            } else {
+              flipBitLiteral &= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
+            }
           }
 
           i.advanceTo(itr.wordsWalked);
@@ -501,12 +505,10 @@ public class ImmutableConciseSet
           nextVal = theQ.peek();
         }
 
-        // advance longest one literal forward and push result back to priority queue
+        // advance longest zero literal forward and push result back to priority queue
         // if a flip bit is still needed, put it in the correct position
-        int newWord;
-        if (flipBitLiteral == ConciseSetUtils.ALL_ZEROS_LITERAL) {
-          newWord = word & 0xC1FFFFFF;
-        } else {
+        int newWord = word & 0xC1FFFFFF;
+        if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
           int position = Integer.numberOfTrailingZeros(flipBitLiteral) + 1;
           newWord = (word & 0xC1FFFFFF) | (position << 25);
         }
@@ -528,7 +530,7 @@ public class ImmutableConciseSet
           int w = entry.getWord();
           WordIterator i = entry.getIterator();
 
-          // if we still have zero fills with flipped bits, OR them here
+          // if we still have one fills with flipped bits, AND them here
           if (ConciseSetUtils.isLiteral(w)) {
             word &= w;
           } else {
@@ -563,7 +565,7 @@ public class ImmutableConciseSet
 
         while (nextVal != null &&
                nextVal.getIterator().startIndex == itr.startIndex) {
-          // check if literal can be created flip bits of other zero sequences
+          // check if literal can be created flip bits of other one sequences
           WordHolder entry = theQ.poll();
           int w = entry.getWord();
           WordIterator i = entry.getIterator();

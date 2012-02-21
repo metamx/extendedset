@@ -982,6 +982,45 @@ public class ImmutableConciseSetTest
     verifyUnion(expected, sets);
   }
 
+  /**
+   * Set 1: literal, one fill, literal
+   * Set 2: zero fill, literal that falls within the one fill above, one fill that falls in one fill above, one fill
+   */
+  @Test
+  public void testUnion20()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    ConciseSet set1 = new ConciseSet();
+    for (int i = 0; i < 5; i++) {
+      set1.add(i);
+    }
+    for (int i = 31; i < 1000; i++) {
+      set1.add(i);
+    }
+
+    ConciseSet set2 = new ConciseSet();
+    for (int i = 62; i < 68; i++) {
+      set2.add(i);
+    }
+    for (int i = 800; i < 1000; i++) {
+      set2.add(i);
+    }
+
+    List<ImmutableConciseSet> sets = Arrays.asList(
+        ImmutableConciseSet.newImmutableFromMutable(set1),
+        ImmutableConciseSet.newImmutableFromMutable(set2)
+    );
+
+    for (int i = 0; i < 5; i++) {
+      expected.add(i);
+    }
+    for (int i = 31; i < 1000; i++) {
+      expected.add(i);
+    }
+
+    verifyUnion(expected, sets);
+  }
+
   private void verifyUnion(List<Integer> expected, List<ImmutableConciseSet> sets)
   {
     List<Integer> actual = Lists.newArrayList();
@@ -1116,6 +1155,42 @@ public class ImmutableConciseSetTest
         ImmutableConciseSet.newImmutableFromMutable(set1),
         ImmutableConciseSet.newImmutableFromMutable(set2)
     );
+
+    verifyIntersection(expected, sets);
+  }
+
+  /**
+   * Set 1: literal, zero fill, literal
+   * Set 2: one fill, literal that falls within the zero fill above, one fill
+   */
+  @Test
+  public void testIntersection6()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    ConciseSet set1 = new ConciseSet();
+    for (int i = 0; i < 5; i++) {
+      set1.add(i);
+    }
+    for (int i = 1000; i < 1005; i++) {
+      set1.add(i);
+    }
+
+    ConciseSet set2 = new ConciseSet();
+    for (int i = 800; i < 805; i++) {
+      set2.add(i);
+    }
+    for (int i = 806; i < 1005; i++) {
+      set2.add(i);
+    }
+
+    List<ImmutableConciseSet> sets = Arrays.asList(
+        ImmutableConciseSet.newImmutableFromMutable(set1),
+        ImmutableConciseSet.newImmutableFromMutable(set2)
+    );
+
+    for (int i = 1000; i < 1005; i++) {
+      expected.add(i);
+    }
 
     verifyIntersection(expected, sets);
   }
