@@ -92,10 +92,11 @@ public class ImmutableConciseSet
 
     int distFromLastWordBoundary = ConciseSetUtils.maxLiteralLengthModulus(last);
     int distToNextWordBoundary = ConciseSetUtils.MAX_LITERAL_LENGTH - distFromLastWordBoundary - 1;
+    last = (last < 0 ) ? 0 : last + distToNextWordBoundary;
 
     int diff = endIndex - last;
     // only append a new literal when the end index is beyond the current word
-    if (diff > distToNextWordBoundary) {
+    if (diff > 0) {
       // first check if the difference can be represented in 31 bits
       if (diff <= ConciseSetUtils.MAX_LITERAL_LENGTH) {
         retVal.add(ConciseSetUtils.ALL_ONES_LITERAL);
@@ -112,7 +113,7 @@ public class ImmutableConciseSet
     if (ConciseSetUtils.isLiteral(lastWord)) {
       lastWord = ConciseSetUtils.clearBitsAfterInLastWord(
           lastWord,
-          ConciseSetUtils.maxLiteralLengthModulus(Math.max(endIndex, last))
+          ConciseSetUtils.maxLiteralLengthModulus(endIndex)
       );
     }
 
@@ -122,7 +123,7 @@ public class ImmutableConciseSet
     if (retVal.isEmpty()) {
       return new ImmutableConciseSet();
     }
-    return new ImmutableConciseSet(IntBuffer.wrap(retVal.toArray()));
+    return compact(new ImmutableConciseSet(IntBuffer.wrap(retVal.toArray())));
   }
 
   public static ImmutableConciseSet compact(ImmutableConciseSet set)

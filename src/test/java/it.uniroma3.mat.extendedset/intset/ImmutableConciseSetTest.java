@@ -1415,6 +1415,47 @@ public class ImmutableConciseSetTest
     verifyComplement(expected, testSet, length);
   }
 
+  /**
+   * Complement with correct last index
+   */
+  @Test
+  public void testComplement11()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    int length = 18930;
+    for (int i = 0; i < 500; i++) {
+      expected.add(i);
+    }
+    for (int i = 18881; i < length; i++) {
+      expected.add(i);
+    }
+
+    ConciseSet set = new ConciseSet();
+    for (int i = 500; i <= 18880; i++) {
+      set.add(i);
+    }
+    ImmutableConciseSet testSet = ImmutableConciseSet.newImmutableFromMutable(set);
+
+    verifyComplement(expected, testSet, length);
+  }
+
+  /**
+   * Complement with empty set and length in first block
+   */
+  @Test
+  public void testComplement12()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    int length = 10;
+    for (int i = 0; i < 10; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
   private void verifyComplement(List<Integer> expected, ImmutableConciseSet set, int endIndex)
   {
     List<Integer> actual = Lists.newArrayList();
@@ -1425,6 +1466,7 @@ public class ImmutableConciseSetTest
     } else {
       res = ImmutableConciseSet.complement(set, endIndex);
     }
+
     IntSet.IntIterator itr = res.iterator();
     while (itr.hasNext()) {
       actual.add(itr.next());
