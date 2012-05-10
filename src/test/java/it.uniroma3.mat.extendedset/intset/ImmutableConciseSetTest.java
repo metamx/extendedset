@@ -1195,6 +1195,69 @@ public class ImmutableConciseSetTest
     verifyIntersection(expected, sets);
   }
 
+  @Test
+  public void testIntersection7()
+  {
+    ConciseSet set1 = new ConciseSet();
+    for (int i = 0; i < 3100; i++) {
+      set1.add(i);
+    }
+
+    ConciseSet set2 = new ConciseSet();
+    set2.add(100);
+    set2.add(500);
+    for (int i = 600; i < 700; i++) {
+      set2.add(i);
+    }
+
+    List<ImmutableConciseSet> sets = Arrays.asList(
+        ImmutableConciseSet.newImmutableFromMutable(set1),
+        ImmutableConciseSet.newImmutableFromMutable(set2)
+    );
+
+    List<Integer> expected = Lists.newArrayList();
+    expected.add(100);
+    expected.add(500);
+    for (int i = 600; i < 700; i++) {
+      expected.add(i);
+    }
+
+    verifyIntersection(expected, sets);
+  }
+
+  @Test
+  public void testIntersection8()
+  {
+    ConciseSet set1 = new ConciseSet();
+    for (int i = 0; i < 3100; i++) {
+      set1.add(i);
+    }
+    set1.add(4001);
+
+    ConciseSet set2 = new ConciseSet();
+    set2.add(100);
+    set2.add(500);
+    for (int i = 600; i < 700; i++) {
+      set2.add(i);
+    }
+    set2.add(4001);
+
+    List<ImmutableConciseSet> sets = Arrays.asList(
+        ImmutableConciseSet.newImmutableFromMutable(set1),
+        ImmutableConciseSet.newImmutableFromMutable(set2)
+    );
+
+    List<Integer> expected = Lists.newArrayList();
+    expected.add(100);
+    expected.add(500);
+    for (int i = 600; i < 700; i++) {
+      expected.add(i);
+    }
+    expected.add(4001);
+
+    verifyIntersection(expected, sets);
+  }
+
   private void verifyIntersection(List<Integer> expected, List<ImmutableConciseSet> sets)
   {
     List<Integer> actual = Lists.newArrayList();

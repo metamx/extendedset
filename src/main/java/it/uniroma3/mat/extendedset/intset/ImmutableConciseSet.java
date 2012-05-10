@@ -92,7 +92,7 @@ public class ImmutableConciseSet
 
     int distFromLastWordBoundary = ConciseSetUtils.maxLiteralLengthModulus(last);
     int distToNextWordBoundary = ConciseSetUtils.MAX_LITERAL_LENGTH - distFromLastWordBoundary - 1;
-    last = (last < 0 ) ? 0 : last + distToNextWordBoundary;
+    last = (last < 0) ? 0 : last + distToNextWordBoundary;
 
     int diff = endIndex - last;
     // only append a new literal when the end index is beyond the current word
@@ -297,7 +297,6 @@ public class ImmutableConciseSet
           }
 
           i.advanceTo(itr.wordsWalked);
-
           if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
           }
@@ -497,10 +496,9 @@ public class ImmutableConciseSet
           }
 
           i.advanceTo(itr.wordsWalked);
-
           if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else {
+          } else if (itr.wordsWalked >= i.wordsWalked) {
             aSeqHasEnded = true;
           }
           nextVal = theQ.peek();
@@ -544,7 +542,7 @@ public class ImmutableConciseSet
 
           if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else {
+          } else if (itr.wordsWalked >= i.wordsWalked) {
             aSeqHasEnded = true;
           }
 
@@ -576,7 +574,7 @@ public class ImmutableConciseSet
             wordsToAdd.add(new WordHolder(flipBitLiteral, i));
           } else if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else {
+          } else if (itr.wordsWalked >= i.wordsWalked) {
             aSeqHasEnded = true;
           }
 
