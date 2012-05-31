@@ -263,12 +263,7 @@ public class ImmutableConciseSet
       // if the next word in the queue starts at a different point than where we ended off we need to create a zero gap
       // to fill the space
       if (currIndex < itr.startIndex) {
-        // number of 31 bit blocks that compromise the fill minus one
-        if (itr.startIndex - currIndex == 1) {
-          addAndCompact(retVal, ConciseSetUtils.ALL_ZEROS_LITERAL);
-        } else {
-          addAndCompact(retVal, itr.startIndex - currIndex - 1);
-        }
+        addAndCompact(retVal, itr.startIndex - currIndex - 1);
         currIndex = itr.startIndex;
       }
 
@@ -448,7 +443,7 @@ public class ImmutableConciseSet
     }
 
     int currIndex = 0;
-    boolean aSeqHasEnded = false;
+    int wordsWalkedAtSequenceEnd = Integer.MAX_VALUE;
 
     while (!theQ.isEmpty()) {
       // create a temp list to hold everything that will get pushed back into the priority queue after each run
@@ -459,15 +454,16 @@ public class ImmutableConciseSet
       int word = curr.getWord();
       WordIterator itr = curr.getIterator();
 
+      // if a sequence has ended, we can break out because of Boolean logic
+      if (itr.startIndex >= wordsWalkedAtSequenceEnd) {
+        break;
+      }
+
       // if the next word in the queue starts at a different point than where we ended off we need to create a one gap
       // to fill the space
       if (currIndex < itr.startIndex) {
         // number of 31 bit blocks that compromise the fill minus one
-        if (itr.startIndex - currIndex == 1) {
-          addAndCompact(retVal, ConciseSetUtils.ALL_ONES_LITERAL);
-        } else {
-          addAndCompact(retVal, (ConciseSetUtils.SEQUENCE_BIT | (itr.startIndex - currIndex - 1)));
-        }
+        addAndCompact(retVal, (ConciseSetUtils.SEQUENCE_BIT | (itr.startIndex - currIndex - 1)));
         currIndex = itr.startIndex;
       }
 
@@ -498,8 +494,8 @@ public class ImmutableConciseSet
           i.advanceTo(itr.wordsWalked);
           if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else if (itr.wordsWalked >= i.wordsWalked) {
-            aSeqHasEnded = true;
+          } else {
+            wordsWalkedAtSequenceEnd = Math.min(i.wordsWalked, wordsWalkedAtSequenceEnd);
           }
           nextVal = theQ.peek();
         }
@@ -517,7 +513,7 @@ public class ImmutableConciseSet
         if (itr.hasNext()) {
           wordsToAdd.add(new WordHolder(itr.next(), itr));
         } else {
-          aSeqHasEnded = true;
+          wordsWalkedAtSequenceEnd = Math.min(itr.wordsWalked, wordsWalkedAtSequenceEnd);
         }
       } else if (ConciseSetUtils.isLiteral(word)) {
         // advance all other literals
@@ -542,8 +538,8 @@ public class ImmutableConciseSet
 
           if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else if (itr.wordsWalked >= i.wordsWalked) {
-            aSeqHasEnded = true;
+          } else {
+            wordsWalkedAtSequenceEnd = Math.min(i.wordsWalked, wordsWalkedAtSequenceEnd);
           }
 
           nextVal = theQ.peek();
@@ -556,7 +552,7 @@ public class ImmutableConciseSet
         if (itr.hasNext()) {
           wordsToAdd.add(new WordHolder(itr.next(), itr));
         } else {
-          aSeqHasEnded = true;
+          wordsWalkedAtSequenceEnd = Math.min(itr.wordsWalked, wordsWalkedAtSequenceEnd);
         }
       } else { // one fills
         int flipBitLiteral;
@@ -574,8 +570,8 @@ public class ImmutableConciseSet
             wordsToAdd.add(new WordHolder(flipBitLiteral, i));
           } else if (i.hasNext()) {
             wordsToAdd.add(new WordHolder(i.next(), i));
-          } else if (itr.wordsWalked >= i.wordsWalked) {
-            aSeqHasEnded = true;
+          } else {
+            wordsWalkedAtSequenceEnd = Math.min(i.wordsWalked, wordsWalkedAtSequenceEnd);
           }
 
           nextVal = theQ.peek();
@@ -588,14 +584,16 @@ public class ImmutableConciseSet
         } else if (itr.hasNext()) {
           wordsToAdd.add(new WordHolder(itr.next(), itr));
         } else {
-          aSeqHasEnded = true;
+          wordsWalkedAtSequenceEnd = Math.min(itr.wordsWalked, wordsWalkedAtSequenceEnd);
         }
       }
 
-      if (aSeqHasEnded) {
-        break;
-      }
       theQ.addAll(wordsToAdd);
+    }
+
+    // fill in any missing one sequences
+    if (currIndex < wordsWalkedAtSequenceEnd) {
+      addAndCompact(retVal, (ConciseSetUtils.SEQUENCE_BIT | (wordsWalkedAtSequenceEnd - currIndex - 1)));
     }
 
     if (retVal.isEmpty()) {
@@ -1005,16 +1003,13 @@ public class ImmutableConciseSet
 
     public void advanceTo(int endCount)
     {
-      if (!hasNext() || wordsWalked == endCount) {
+      while (hasNext() && wordsWalked < endCount) {
+        next();
+      }
+      if (wordsWalked <= endCount) {
         return;
       }
 
-      while (wordsWalked < endCount) {
-        next();
-        if (!hasNext() || wordsWalked == endCount) {
-          return;
-        }
-      }
       nextWord = (currWord & 0xC1000000) | (wordsWalked - endCount - 1);
       startIndex = endCount;
       hasNextWord = true;
@@ -1025,6 +1020,9 @@ public class ImmutableConciseSet
     {
       if (isEmpty()) {
         return false;
+      }
+      if (hasNextWord) {
+        return true;
       }
       return currRow < (words.capacity() - 1);
     }
