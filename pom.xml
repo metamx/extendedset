@@ -74,7 +74,7 @@
         <repository>
             <id>central-local</id>
             <name>Central</name>
-            <url>http://metamx.artifactoryonline.com/metamx/libs-releases-local</url>
+            <url>http://metamx.artifactoryonline.com/metamx/pub-libs-releases-local</url>
         </repository>
     </distributionManagement>
 </project>
