@@ -54,11 +54,6 @@
             <version>4.8.1</version>
             <scope>test</scope>
         </dependency>
-        <dependency>
-            <groupId>net.java.dev.jets3t</groupId>
-            <artifactId>jets3t</artifactId>
-            <version>0.001-emr</version>
-        </dependency>
     </dependencies>
 
     <build>
