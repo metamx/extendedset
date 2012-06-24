@@ -699,6 +699,11 @@ public class ImmutableConciseSet
     return buf.array();
   }
 
+  public int getLastWordIndex()
+  {
+    return lastWordIndex;
+  }
+
   // Based on the ConciseSet implementation by Alessandro Colantonio
   private int calcSize()
   {
