@@ -20,11 +20,13 @@ package it.uniroma3.mat.extendedset.intset;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MinMaxPriorityQueue;
+import com.google.common.collect.UnmodifiableIterator;
 import com.google.common.primitives.Ints;
 import it.uniroma3.mat.extendedset.utilities.IntList;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
@@ -47,30 +49,46 @@ public class ImmutableConciseSet
     return (x < y) ? -1 : ((x == y) ? 0 : 1);
   }
 
+  public static ImmutableConciseSet union(ImmutableConciseSet... sets)
+  {
+    return union(Arrays.asList(sets));
+  }
+
   public static ImmutableConciseSet union(Iterable<ImmutableConciseSet> sets)
   {
-    List<ImmutableConciseSet> partialResults = Lists.newArrayList();
-    Iterator<ImmutableConciseSet> itr = sets.iterator();
+    return union(sets.iterator());
+  }
 
-    while (itr.hasNext()) {
-      partialResults.add(doUnion(Iterators.limit(itr, CHUNK_SIZE)));
+  public static ImmutableConciseSet union(Iterator<ImmutableConciseSet> sets)
+  {
+    ImmutableConciseSet partialResults = doUnion(Iterators.limit(sets, CHUNK_SIZE));
+    while (sets.hasNext()) {
+      final UnmodifiableIterator<ImmutableConciseSet> partialIter = Iterators.singletonIterator(partialResults);
+      partialResults = doUnion(Iterators.<ImmutableConciseSet>concat(partialIter, Iterators.limit(sets, CHUNK_SIZE)));
     }
-    ImmutableConciseSet retVal = doUnion(partialResults.iterator());
+    return partialResults;
+  }
 
-    return retVal;
+  public static ImmutableConciseSet intersection(ImmutableConciseSet... sets)
+  {
+    return intersection(Arrays.asList(sets));
   }
 
   public static ImmutableConciseSet intersection(Iterable<ImmutableConciseSet> sets)
   {
-    List<ImmutableConciseSet> partialResults = Lists.newArrayList();
-    Iterator<ImmutableConciseSet> itr = sets.iterator();
+    return intersection(sets.iterator());
+  }
 
-    while (itr.hasNext()) {
-      partialResults.add(doIntersection(Iterators.limit(itr, CHUNK_SIZE)));
+  public static ImmutableConciseSet intersection(Iterator<ImmutableConciseSet> sets)
+  {
+    ImmutableConciseSet partialResults = doIntersection(Iterators.limit(sets, CHUNK_SIZE));
+    while (sets.hasNext()) {
+      final UnmodifiableIterator<ImmutableConciseSet> partialIter = Iterators.singletonIterator(partialResults);
+      partialResults = doIntersection(
+          Iterators.<ImmutableConciseSet>concat(partialIter, Iterators.limit(sets, CHUNK_SIZE))
+      );
     }
-    ImmutableConciseSet retVal = doIntersection(partialResults.iterator());
-
-    return retVal;
+    return partialResults;
   }
 
   public static ImmutableConciseSet complement(ImmutableConciseSet set)
