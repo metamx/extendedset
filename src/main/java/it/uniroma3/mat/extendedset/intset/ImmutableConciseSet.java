@@ -85,7 +85,7 @@ public class ImmutableConciseSet
     while (sets.hasNext()) {
       final UnmodifiableIterator<ImmutableConciseSet> partialIter = Iterators.singletonIterator(partialResults);
       partialResults = doIntersection(
-          Iterators.<ImmutableConciseSet>concat(partialIter, Iterators.limit(sets, CHUNK_SIZE))
+          Iterators.<ImmutableConciseSet>concat(Iterators.limit(sets, CHUNK_SIZE), partialIter)
       );
     }
     return partialResults;

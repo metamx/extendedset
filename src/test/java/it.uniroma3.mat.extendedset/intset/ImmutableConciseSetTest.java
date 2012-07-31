@@ -1615,6 +1615,12 @@ public class ImmutableConciseSetTest
     verifyIntersection(expected, sets);
   }
 
+  @Test
+  public void testIntersectionTerminates() throws Exception
+  {
+    verifyIntersection(Arrays.<Integer>asList(), Arrays.asList(new ImmutableConciseSet(), new ImmutableConciseSet()));
+  }
+
   private void verifyIntersection(List<Integer> expected, List<ImmutableConciseSet> sets)
   {
     List<Integer> actual = Lists.newArrayList();
