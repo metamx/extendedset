@@ -102,27 +102,34 @@ public class ImmutableConciseSet
       return new ImmutableConciseSet();
     }
 
+    // special case when the set is empty and we need a concise set of ones
+    if (set == null || set.isEmpty()) {
+      ConciseSet newSet = new ConciseSet();
+      for (int i = 0; i < length; i++) {
+        newSet.add(i);
+      }
+      return ImmutableConciseSet.newImmutableFromMutable(newSet);
+    }
+
     IntList retVal = new IntList();
     int endIndex = length - 1;
 
     int wordsWalked = 0;
     int last = 0;
 
-    if (set != null) {
-      WordIterator iter = set.newWordIterator();
+    WordIterator iter = set.newWordIterator();
 
-      while (iter.hasNext()) {
-        int word = iter.next();
-        wordsWalked = iter.wordsWalked;
-        if (ConciseSetUtils.isLiteral(word)) {
-          retVal.add(ConciseSetUtils.ALL_ZEROS_LITERAL | ~word);
-        } else {
-          retVal.add(ConciseSetUtils.SEQUENCE_BIT ^ word);
-        }
+    while (iter.hasNext()) {
+      int word = iter.next();
+      wordsWalked = iter.wordsWalked;
+      if (ConciseSetUtils.isLiteral(word)) {
+        retVal.add(ConciseSetUtils.ALL_ZEROS_LITERAL | ~word);
+      } else {
+        retVal.add(ConciseSetUtils.SEQUENCE_BIT ^ word);
       }
-
-      last = set.getLast();
     }
+
+    last = set.getLast();
 
     int distFromLastWordBoundary = ConciseSetUtils.maxLiteralLengthModulus(last);
     int distToNextWordBoundary = ConciseSetUtils.MAX_LITERAL_LENGTH - distFromLastWordBoundary - 1;

@@ -1882,6 +1882,22 @@ public class ImmutableConciseSetTest
     verifyComplement(expected, testSet, length);
   }
 
+  /**
+   * Complement with empty list of some length
+   */
+  @Test
+  public void testComplement13()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    int length = 10;
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
   private void verifyComplement(List<Integer> expected, ImmutableConciseSet set, int endIndex)
   {
     List<Integer> actual = Lists.newArrayList();
