@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>it.uniroma3.mat</groupId>
     <artifactId>extendedset</artifactId>
-    <version>1.3.4-SNAPSHOT</version>
+    <version>1.3.4</version>
     <name>extendedset</name>
     <description>
         Implementation of CONCISE (COmpressed 'N" Composable Integer SEt) bit map compression algorithm by Alessandro
