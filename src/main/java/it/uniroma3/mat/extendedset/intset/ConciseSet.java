@@ -120,7 +120,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * Resets to an empty set
    *
    * @see #ConciseSet()
-   *      {@link #clear()}
+   * {@link #clear()}
    */
   private void reset()
   {
@@ -295,7 +295,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param word word to check
    *
    * @return <code>true</code> if the given word is a sequence of 0's or 1's
-   *         but with no (un)set bit
+   * but with no (un)set bit
    */
   private static boolean isSequenceWithNoBits(int word)
   {
@@ -322,7 +322,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param word word to check
    *
    * @return the sequence corresponding to the given sequence and with no
-   *         (un)set bits
+   * (un)set bits
    */
   private static int getSequenceWithNoBits(int word)
   {
@@ -341,7 +341,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param word word to check
    *
    * @return the literal contained within the given word, <i>with the most
-   *         significant bit set to 1</i>.
+   * significant bit set to 1</i>.
    */
   private /*static*/ int getLiteral(int word)
   {
@@ -372,7 +372,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param word sequence word to check
    *
    * @return the position of the set bit, from 0 to 31. If the sequence has no
-   *         set/unset bit, returns -1.
+   * set/unset bit, returns -1.
    */
   private static int getFlippedBit(int word)
   {
@@ -423,7 +423,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param literal literal word (namely, with MSB unset)
    *
    * @return <code>true</code> when the given literal contains only one set
-   *         bit
+   * bit
    */
   private static boolean containsOnlyOneBit(int literal)
   {
@@ -1011,7 +1011,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
 
     /**
      * @return the literal word corresponding to each block contained in the
-     *         current sequence word. Not to be used with literal words!
+     * current sequence word. Not to be used with literal words!
      */
     int toLiteral()
     {
@@ -1290,6 +1290,9 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    */
   public int[] getWords()
   {
+    if (words == null) {
+      return new int[]{};
+    }
     return Arrays.copyOf(words, lastWordIndex + 1);
   }
 
@@ -2129,7 +2132,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * @param other {@link ConciseSet} instance to use to replace the current one
    *
    * @return <code>true</code> if the given set is different from the current
-   *         set
+   * set
    */
   private boolean replaceWith(ConciseSet other)
   {
