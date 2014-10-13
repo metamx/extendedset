@@ -735,6 +735,9 @@ public class ImmutableConciseSet
 
   public byte[] toBytes()
   {
+    if (words == null) {
+      return new byte[]{};
+    }
     ByteBuffer buf = ByteBuffer.allocate(words.capacity() * Ints.BYTES);
     buf.asIntBuffer().put(words.asReadOnlyBuffer());
     return buf.array();
@@ -878,7 +881,7 @@ public class ImmutableConciseSet
 
   private boolean isEmpty()
   {
-    return words == null;
+    return words == null || words.limit() == 0;
   }
 
   @Override
