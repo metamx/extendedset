@@ -1,2 +1,8 @@
 extendedset
 Copyright 2012 Metamarkets Group Inc.
+
+-------------------------------------------------------------------------------
+
+This library contains a modified version of Alessandro Colantonio's CONCISE
+(COmpressed 'N' Composable Integer SEt) library, extending the functionality of
+ConciseSet to use IntBuffers.
