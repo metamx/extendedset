@@ -1823,6 +1823,116 @@ public class ImmutableConciseSetTest
     verifyComplement(expected, testSet, length);
   }
 
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_31()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 31;
+
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_32()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 32;
+
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
+
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_1()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 1;
+
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_1024()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 1024;
+
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_0()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 0;
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
+
+  /**
+   * Complement of a null set with a length
+   */
+  @Test
+  public void testComplement9_93()
+  {
+    List<Integer> expected = Lists.newArrayList();
+    final int length = 31 * 3;
+
+    for (int i = 0; i < length; i++) {
+      expected.add(i);
+    }
+
+    ImmutableConciseSet testSet = new ImmutableConciseSet();
+
+    verifyComplement(expected, testSet, length);
+  }
+
   /**
    * Complement of a null set to create a one fill
    */

@@ -336,6 +336,11 @@ public class ConciseSetUtils
     return lastWord &= ALL_ZEROS_LITERAL | (0xFFFFFFFF >>> (31 - lastSetBit));
   }
 
+  public static int onesUntil(int bit)
+  {
+    return 0x80000000 | ((1<<bit) - 1);
+  }
+
   public interface WordExpander
   {
     public boolean hasNext();
