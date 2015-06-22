@@ -104,10 +104,28 @@ public class ImmutableConciseSet
 
     // special case when the set is empty and we need a concise set of ones
     if (set == null || set.isEmpty()) {
-      ConciseSet newSet = new ConciseSet();
-      for (int i = 0; i < length; i++) {
-        newSet.add(i);
+      final int leftoverBits = length % 31;
+      final int onesBlocks = length / 31;
+      final int[] words;
+      if (onesBlocks > 0) {
+        if (leftoverBits > 0) {
+          words = new int[]{
+              ConciseSetUtils.SEQUENCE_BIT | (onesBlocks - 1),
+              ConciseSetUtils.onesUntil(leftoverBits)
+          };
+        } else {
+          words = new int[]{
+              ConciseSetUtils.SEQUENCE_BIT | (onesBlocks - 1)
+          };
+        }
+      } else {
+        if (leftoverBits > 0) {
+          words = new int[]{ConciseSetUtils.onesUntil(leftoverBits)};
+        } else {
+          words = new int[]{};
+        }
       }
+      ConciseSet newSet = new ConciseSet(words, false);
       return ImmutableConciseSet.newImmutableFromMutable(newSet);
     }
 

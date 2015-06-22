@@ -21,8 +21,12 @@ import junit.framework.Assert;
 import org.junit.Test;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Random;
 
 /**
  */
@@ -1811,16 +1815,42 @@ public class ImmutableConciseSetTest
   @Test
   public void testComplement9()
   {
-    List<Integer> expected = Lists.newArrayList();
-    final int length = 35;
-
-    for (int i = 0; i < length; i++) {
-      expected.add(i);
+    final List<Integer> lengths = new ArrayList<Integer>();
+    lengths.addAll(
+        Arrays.asList(
+            35,
+            31,
+            32,
+            1,
+            0,
+            31 * 3,
+            1024,
+            ConciseSetUtils.MAX_ALLOWED_INTEGER
+        )
+    );
+    final Random random = new Random(701534702L);
+    for (int i = 0; i < 10; ++i) {
+      lengths.add(random.nextInt(ConciseSetUtils.MAX_ALLOWED_INTEGER + 1));
     }
-
-    ImmutableConciseSet testSet = new ImmutableConciseSet();
-
-    verifyComplement(expected, testSet, length);
+    final ImmutableConciseSet emptySet = new ImmutableConciseSet();
+    for (final int length : lengths) {
+      final ImmutableConciseSet complement = ImmutableConciseSet.complement(emptySet, length);
+      final IntSet.IntIterator intIterator = complement.iterator();
+      for (int i = 0; i < length; i++) {
+        final int n = intIterator.next();
+        if (i != n) {
+          Assert.assertEquals(String.format("Failure at bit [%d] on length [%d]", i, length), i, n);
+        }
+      }
+      NoSuchElementException ex = null;
+      try {
+        intIterator.next();
+      }
+      catch (NoSuchElementException e) {
+        ex = e;
+      }
+      Assert.assertNotNull(ex);
+    }
   }
 
   /**
