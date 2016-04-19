@@ -16,6 +16,7 @@
 
 package it.uniroma3.mat.extendedset.intset;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import junit.framework.Assert;
 import org.junit.Test;
@@ -23,7 +24,6 @@ import org.junit.Test;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
@@ -1094,6 +1094,16 @@ public class ImmutableConciseSetTest
     }
 
     verifyUnion(expected, sets);
+  }
+
+  /**
+   * Empty union
+   */
+  @Test
+  public void testUnion23()
+  {
+    final ImmutableConciseSet s1 = new ImmutableConciseSet(), s2 = new ImmutableConciseSet();
+    verifyUnion(ImmutableList.<Integer>of(), ImmutableList.of(s1, s2));
   }
 
   private void verifyUnion(List<Integer> expected, List<ImmutableConciseSet> sets)
