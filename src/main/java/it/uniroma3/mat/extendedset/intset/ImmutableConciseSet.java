@@ -822,6 +822,16 @@ public class ImmutableConciseSet
     return last;
   }
 
+  public boolean contains(final int integer)
+  {
+    if (isEmpty()) {
+      return false;
+    }
+    final IntSet.IntIterator intIterator = iterator();
+    intIterator.skipAllBefore(integer);
+    return intIterator.hasNext() && intIterator.next() == integer;
+  }
+
   // Based on the ConciseSet implementation by Alessandro Colantonio
   public int get(int i)
   {

@@ -23,10 +23,11 @@ import org.junit.Test;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Random;
+import java.util.Set;
 
 /**
  */
@@ -1944,5 +1945,28 @@ public class ImmutableConciseSetTest
       actual.add(itr.next());
     }
     Assert.assertEquals(expected, actual);
+  }
+
+  @Test
+  public void testContains()
+  {
+    final ConciseSet conciseSet = new ConciseSet();
+    final Random random = new Random(543167436715430L);
+    final Set<Integer> integerSet = new HashSet<>();
+    int max = -1;
+    for (int i = 0; i < 100; ++i) {
+      final int j = random.nextInt(1 << 20);
+      integerSet.add(j);
+      conciseSet.add(j);
+      if (j > max) {
+        max = j;
+      }
+    }
+    final ImmutableConciseSet immutableConciseSet = ImmutableConciseSet.newImmutableFromMutable(conciseSet);
+    for (int i = 0; i < max + 10; ++i) {
+      final String s = Integer.toString(i);
+      Assert.assertEquals(s, integerSet.contains(i), conciseSet.contains(i));
+      Assert.assertEquals(s, integerSet.contains(i), immutableConciseSet.contains(i));
+    }
   }
 }
