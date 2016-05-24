@@ -4,9 +4,6 @@ jdk:
   - oraclejdk7
   - oraclejdk8
 
-install: mvn -Pbuild install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
-script: mvn -Pbuild test -B -V
-
 sudo: false
 
 cache:
