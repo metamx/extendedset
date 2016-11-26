@@ -284,7 +284,7 @@ public class ConciseSetUtils
 
   public static int flipBitAsBinaryString(int flipBit)
   {
-    return ((Number) Math.pow(2, flipBit)).intValue();
+    return 1 << flipBit;
   }
 
   /**
