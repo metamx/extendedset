@@ -296,7 +296,7 @@ public class ConciseSetUtils
    */
   public static int getLiteralBitCount(int word)
   {
-    return BitCount.count(getLiteralBits(word));
+    return Integer.bitCount(getLiteralBits(word));
   }
 
   /**
