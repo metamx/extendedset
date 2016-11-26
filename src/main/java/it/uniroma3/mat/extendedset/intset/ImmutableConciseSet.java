@@ -1061,7 +1061,7 @@ public class ImmutableConciseSet
     }
   }
 
-  public class WordIterator implements Iterator
+  public class WordIterator implements org.roaringbitmap.IntIterator, Cloneable
   {
     private int startIndex;
     private int wordsWalked;
@@ -1105,12 +1105,12 @@ public class ImmutableConciseSet
     }
 
     @Override
-    public Integer next()
+    public int next()
     {
       if (hasNextWord) {
         currWord = nextWord;
         hasNextWord = false;
-        return new Integer(currWord);
+        return currWord;
       }
 
       currWord = words.get(++currRow);
@@ -1121,13 +1121,17 @@ public class ImmutableConciseSet
         wordsWalked += ConciseSetUtils.getSequenceNumWords(currWord);
       }
 
-      return new Integer(currWord);
+      return currWord;
     }
 
     @Override
-    public void remove()
-    {
-      throw new UnsupportedOperationException();
+    public WordIterator clone() {
+      try {
+        return (WordIterator) super.clone();
+      }
+      catch (CloneNotSupportedException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
