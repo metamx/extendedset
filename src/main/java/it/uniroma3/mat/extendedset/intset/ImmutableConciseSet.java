@@ -36,6 +36,84 @@ public class ImmutableConciseSet
 {
   private final static int CHUNK_SIZE = 10000;
 
+  private static final Comparator<WordHolder> UNION_COMPARATOR = new Comparator<WordHolder>()
+  {
+    // lhs = current word position, rhs = the iterator
+    // Comparison is first by index, then one fills > literals > zero fills
+    // one fills are sorted by length (longer one fills have priority)
+    // similarily, shorter zero fills have priority
+    @Override
+    public int compare(WordHolder h1, WordHolder h2)
+    {
+      int w1 = h1.getWord();
+      int w2 = h2.getWord();
+      int s1 = h1.getIterator().startIndex;
+      int s2 = h2.getIterator().startIndex;
+
+      if (s1 != s2) {
+        return compareInts(s1, s2);
+      }
+
+      if (ConciseSetUtils.isOneSequence(w1)) {
+        if (ConciseSetUtils.isOneSequence(w2)) {
+          return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+        }
+        return -1;
+      } else if (ConciseSetUtils.isLiteral(w1)) {
+        if (ConciseSetUtils.isOneSequence(w2)) {
+          return 1;
+        } else if (ConciseSetUtils.isLiteral(w2)) {
+          return 0;
+        }
+        return -1;
+      } else {
+        if (!ConciseSetUtils.isZeroSequence(w2)) {
+          return 1;
+        }
+        return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+      }
+    }
+  };
+
+  private static final Comparator<WordHolder> INTERSECTION_COMPARATOR = new Comparator<WordHolder>()
+  {
+    // lhs = current word position, rhs = the iterator
+    // Comparison is first by index, then zero fills > literals > one fills
+    // zero fills are sorted by length (longer zero fills have priority)
+    // similarily, shorter one fills have priority
+    @Override
+    public int compare(WordHolder h1, WordHolder h2)
+    {
+      int w1 = h1.getWord();
+      int w2 = h2.getWord();
+      int s1 = h1.getIterator().startIndex;
+      int s2 = h2.getIterator().startIndex;
+
+      if (s1 != s2) {
+        return compareInts(s1, s2);
+      }
+
+      if (ConciseSetUtils.isZeroSequence(w1)) {
+        if (ConciseSetUtils.isZeroSequence(w2)) {
+          return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+        }
+        return -1;
+      } else if (ConciseSetUtils.isLiteral(w1)) {
+        if (ConciseSetUtils.isZeroSequence(w2)) {
+          return 1;
+        } else if (ConciseSetUtils.isLiteral(w2)) {
+          return 0;
+        }
+        return -1;
+      } else {
+        if (!ConciseSetUtils.isOneSequence(w2)) {
+          return 1;
+        }
+        return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+      }
+    }
+  };
+
   public static ImmutableConciseSet newImmutableFromMutable(ConciseSet conciseSet)
   {
     if (conciseSet == null || conciseSet.isEmpty()) {
@@ -257,46 +335,7 @@ public class ImmutableConciseSet
   {
     IntList retVal = new IntList();
 
-    // lhs = current word position, rhs = the iterator
-    // Comparison is first by index, then one fills > literals > zero fills
-    // one fills are sorted by length (longer one fills have priority)
-    // similarily, shorter zero fills have priority
-    MinMaxPriorityQueue<WordHolder> theQ = MinMaxPriorityQueue.orderedBy(
-        new Comparator<WordHolder>()
-        {
-          @Override
-          public int compare(WordHolder h1, WordHolder h2)
-          {
-            int w1 = h1.getWord();
-            int w2 = h2.getWord();
-            int s1 = h1.getIterator().startIndex;
-            int s2 = h2.getIterator().startIndex;
-
-            if (s1 != s2) {
-              return compareInts(s1, s2);
-            }
-
-            if (ConciseSetUtils.isOneSequence(w1)) {
-              if (ConciseSetUtils.isOneSequence(w2)) {
-                return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
-              }
-              return -1;
-            } else if (ConciseSetUtils.isLiteral(w1)) {
-              if (ConciseSetUtils.isOneSequence(w2)) {
-                return 1;
-              } else if (ConciseSetUtils.isLiteral(w2)) {
-                return 0;
-              }
-              return -1;
-            } else {
-              if (!ConciseSetUtils.isZeroSequence(w2)) {
-                return 1;
-              }
-              return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
-            }
-          }
-        }
-    ).create();
+    MinMaxPriorityQueue<WordHolder> theQ = MinMaxPriorityQueue.orderedBy(UNION_COMPARATOR).create();
 
     // populate priority queue
     while (sets.hasNext()) {
@@ -448,46 +487,7 @@ public class ImmutableConciseSet
   {
     IntList retVal = new IntList();
 
-    // lhs = current word position, rhs = the iterator
-    // Comparison is first by index, then zero fills > literals > one fills
-    // zero fills are sorted by length (longer zero fills have priority)
-    // similarily, shorter one fills have priority
-    MinMaxPriorityQueue<WordHolder> theQ = MinMaxPriorityQueue.orderedBy(
-        new Comparator<WordHolder>()
-        {
-          @Override
-          public int compare(WordHolder h1, WordHolder h2)
-          {
-            int w1 = h1.getWord();
-            int w2 = h2.getWord();
-            int s1 = h1.getIterator().startIndex;
-            int s2 = h2.getIterator().startIndex;
-
-            if (s1 != s2) {
-              return compareInts(s1, s2);
-            }
-
-            if (ConciseSetUtils.isZeroSequence(w1)) {
-              if (ConciseSetUtils.isZeroSequence(w2)) {
-                return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
-              }
-              return -1;
-            } else if (ConciseSetUtils.isLiteral(w1)) {
-              if (ConciseSetUtils.isZeroSequence(w2)) {
-                return 1;
-              } else if (ConciseSetUtils.isLiteral(w2)) {
-                return 0;
-              }
-              return -1;
-            } else {
-              if (!ConciseSetUtils.isOneSequence(w2)) {
-                return 1;
-              }
-              return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
-            }
-          }
-        }
-    ).create();
+    MinMaxPriorityQueue<WordHolder> theQ = MinMaxPriorityQueue.orderedBy(INTERSECTION_COMPARATOR).create();
 
     // populate priority queue
     while (sets.hasNext()) {
