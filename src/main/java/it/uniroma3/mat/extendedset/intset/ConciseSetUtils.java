@@ -108,7 +108,7 @@ public class ConciseSetUtils
    */
   public static int maxLiteralLengthMultiplication(int n)
   {
-    return (n << 5) - n;
+    return n * 31;
   }
 
   /**
@@ -132,9 +132,8 @@ public class ConciseSetUtils
    */
   public static boolean isLiteral(int word)
   {
-    // "word" must be 1*
-    // NOTE: this is faster than "return (word & 0x80000000) == 0x80000000"
-    return (word & 0x80000000) != 0;
+    // the highest one bit should be 1, which means the word as a number is negative
+    return word < 0;
   }
 
   /**
@@ -313,17 +312,17 @@ public class ConciseSetUtils
 
   public static boolean isAllOnesLiteral(int word)
   {
-    return (word & -1) == -1;
+    return word == -1;
   }
 
   public static boolean isAllZerosLiteral(int word)
   {
-    return (word | 0x80000000) == 0x80000000;
+    return word == 0x80000000;
   }
 
   public static boolean isLiteralWithSingleZeroBit(int word)
   {
-    return isLiteral(word) && (Integer.bitCount(~word) == 1);
+    return isLiteral(word) && Integer.bitCount(word) == 31;
   }
 
   public static boolean isLiteralWithSingleOneBit(int word)
