@@ -423,27 +423,35 @@ public class ConciseSetUtils
     public void reset(int offset, int word, boolean fromBeginning)
     {
       if (isLiteral(word)) {
-        len = 0;
-        for (int i = 0; i < MAX_LITERAL_LENGTH; i++) {
-          if ((word & (1 << i)) != 0) {
-            buffer[len++] = offset + i;
-          }
-        }
-        current = fromBeginning ? 0 : len;
+        resetLiteral(offset, word, fromBeginning);
+      } else if (isZeroSequence(word)) {
+        resetZeroSequence(offset, word, fromBeginning);
       } else {
-        if (isZeroSequence(word)) {
-          if (isSequenceWithNoBits(word)) {
-            len = 0;
-            current = 0;
-          } else {
-            len = 1;
-            buffer[0] = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
-            current = fromBeginning ? 0 : 1;
-          }
-        } else {
-          throw new RuntimeException("sequence of ones!");
+        throw new RuntimeException("sequence of ones!");
+      }
+    }
+
+    private void resetZeroSequence(int offset, int word, boolean fromBeginning)
+    {
+      if (isSequenceWithNoBits(word)) {
+        len = 0;
+        current = 0;
+      } else {
+        len = 1;
+        buffer[0] = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
+        current = fromBeginning ? 0 : 1;
+      }
+    }
+
+    private void resetLiteral(int offset, int word, boolean fromBeginning)
+    {
+      len = 0;
+      for (int i = 0; i < MAX_LITERAL_LENGTH; i++) {
+        if ((word & (1 << i)) != 0) {
+          buffer[len++] = offset + i;
         }
       }
+      current = fromBeginning ? 0 : len;
     }
 
     @Override
