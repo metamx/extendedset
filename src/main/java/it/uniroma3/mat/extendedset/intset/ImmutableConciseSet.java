@@ -51,12 +51,13 @@ public class ImmutableConciseSet
       int s2 = h2.getIterator().startIndex;
 
       if (s1 != s2) {
-        return compareInts(s1, s2);
+        return Integer.compare(s1, s2);
       }
 
       if (ConciseSetUtils.isOneSequence(w1)) {
         if (ConciseSetUtils.isOneSequence(w2)) {
-          return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+          // reverse
+          return Integer.compare(ConciseSetUtils.getSequenceNumWords(w2), ConciseSetUtils.getSequenceNumWords(w1));
         }
         return -1;
       } else if (ConciseSetUtils.isLiteral(w1)) {
@@ -70,7 +71,7 @@ public class ImmutableConciseSet
         if (!ConciseSetUtils.isZeroSequence(w2)) {
           return 1;
         }
-        return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+        return Integer.compare(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
       }
     }
   };
@@ -90,12 +91,13 @@ public class ImmutableConciseSet
       int s2 = h2.getIterator().startIndex;
 
       if (s1 != s2) {
-        return compareInts(s1, s2);
+        return Integer.compare(s1, s2);
       }
 
       if (ConciseSetUtils.isZeroSequence(w1)) {
         if (ConciseSetUtils.isZeroSequence(w2)) {
-          return -compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+          // reverse
+          return Integer.compare(ConciseSetUtils.getSequenceNumWords(w2), ConciseSetUtils.getSequenceNumWords(w1));
         }
         return -1;
       } else if (ConciseSetUtils.isLiteral(w1)) {
@@ -109,7 +111,7 @@ public class ImmutableConciseSet
         if (!ConciseSetUtils.isOneSequence(w2)) {
           return 1;
         }
-        return compareInts(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+        return Integer.compare(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
       }
     }
   };
@@ -120,11 +122,6 @@ public class ImmutableConciseSet
       return new ImmutableConciseSet();
     }
     return new ImmutableConciseSet(IntBuffer.wrap(conciseSet.getWords()));
-  }
-
-  public static int compareInts(int x, int y)
-  {
-    return (x < y) ? -1 : ((x == y) ? 0 : 1);
   }
 
   public static ImmutableConciseSet union(ImmutableConciseSet... sets)
