@@ -54,24 +54,27 @@ public class ImmutableConciseSet
       int w1 = i1.getWord();
       int w2 = i2.getWord();
 
-      if (ConciseSetUtils.isOneSequence(w1)) {
+      if (ConciseSetUtils.isLiteral(w1)) {
+        if (ConciseSetUtils.isLiteral(w2)) {
+          return 0;
+        } else if (ConciseSetUtils.isZeroSequence(w2)) {
+          return -1;
+        } else {
+          // w2 is "one sequence"
+          return 1;
+        }
+      } else if (ConciseSetUtils.isZeroSequence(w1)) {
+        if (!ConciseSetUtils.isZeroSequence(w2)) {
+          return 1;
+        }
+        return Integer.compare(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
+      } else {
+        // w1 is "one sequence"
         if (ConciseSetUtils.isOneSequence(w2)) {
           // reverse
           return Integer.compare(ConciseSetUtils.getSequenceNumWords(w2), ConciseSetUtils.getSequenceNumWords(w1));
         }
         return -1;
-      } else if (ConciseSetUtils.isLiteral(w1)) {
-        if (ConciseSetUtils.isOneSequence(w2)) {
-          return 1;
-        } else if (ConciseSetUtils.isLiteral(w2)) {
-          return 0;
-        }
-        return -1;
-      } else {
-        if (!ConciseSetUtils.isZeroSequence(w2)) {
-          return 1;
-        }
-        return Integer.compare(ConciseSetUtils.getSequenceNumWords(w1), ConciseSetUtils.getSequenceNumWords(w2));
       }
     }
   };
@@ -95,20 +98,23 @@ public class ImmutableConciseSet
       int w1 = i1.getWord();
       int w2 = i2.getWord();
 
-      if (ConciseSetUtils.isZeroSequence(w1)) {
+      if (ConciseSetUtils.isLiteral(w1)) {
+        if (ConciseSetUtils.isLiteral(w2)) {
+          return 0;
+        } else if (ConciseSetUtils.isZeroSequence(w2)) {
+          return 1;
+        } else {
+          // w2 is "one sequence"
+          return -1;
+        }
+      } else if (ConciseSetUtils.isZeroSequence(w1)) {
         if (ConciseSetUtils.isZeroSequence(w2)) {
           // reverse
           return Integer.compare(ConciseSetUtils.getSequenceNumWords(w2), ConciseSetUtils.getSequenceNumWords(w1));
         }
         return -1;
-      } else if (ConciseSetUtils.isLiteral(w1)) {
-        if (ConciseSetUtils.isZeroSequence(w2)) {
-          return 1;
-        } else if (ConciseSetUtils.isLiteral(w2)) {
-          return 0;
-        }
-        return -1;
       } else {
+        // w1 is "one sequence"
         if (!ConciseSetUtils.isOneSequence(w2)) {
           return 1;
         }
@@ -282,23 +288,33 @@ public class ImmutableConciseSet
     int last = set.get(length - 1);
 
     int newWord = 0;
-    if (ConciseSetUtils.isAllOnesLiteral(last)) {
-      if (ConciseSetUtils.isAllOnesLiteral(wordToAdd)) {
-        newWord = 0x40000001;
-      } else if (ConciseSetUtils.isOneSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
-        newWord = wordToAdd + 1;
-      }
-    } else if (ConciseSetUtils.isOneSequence(last)) {
-      if (ConciseSetUtils.isAllOnesLiteral(wordToAdd)) {
-        newWord = last + 1;
-      } else if (ConciseSetUtils.isOneSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
-        newWord = last + ConciseSetUtils.getSequenceNumWords(wordToAdd);
-      }
-    } else if (ConciseSetUtils.isAllZerosLiteral(last)) {
-      if (ConciseSetUtils.isAllZerosLiteral(wordToAdd)) {
-        newWord = 0x00000001;
-      } else if (ConciseSetUtils.isZeroSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
-        newWord = wordToAdd + 1;
+    if (ConciseSetUtils.isLiteral(last)) {
+      if (ConciseSetUtils.isLiteralWithSingleOneBit(last)) {
+        int position = Integer.numberOfTrailingZeros(last) + 1;
+        if (ConciseSetUtils.isAllZerosLiteral(wordToAdd)) {
+          newWord = 0x00000001 | (position << 25);
+        } else if (ConciseSetUtils.isZeroSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
+          newWord = (wordToAdd + 1) | (position << 25);
+        }
+      } else if (ConciseSetUtils.isAllZerosLiteral(last)) {
+        if (ConciseSetUtils.isAllZerosLiteral(wordToAdd)) {
+          newWord = 0x00000001;
+        } else if (ConciseSetUtils.isZeroSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
+          newWord = wordToAdd + 1;
+        }
+      } else if (ConciseSetUtils.isLiteralWithSingleZeroBit(last)) {
+        int position = Integer.numberOfTrailingZeros(~last) + 1;
+        if (ConciseSetUtils.isAllOnesLiteral(wordToAdd)) {
+          newWord = 0x40000001 | (position << 25);
+        } else if (ConciseSetUtils.isOneSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
+          newWord = (wordToAdd + 1) | (position << 25);
+        }
+      } else if (ConciseSetUtils.isAllOnesLiteral(last)) {
+        if (ConciseSetUtils.isAllOnesLiteral(wordToAdd)) {
+          newWord = 0x40000001;
+        } else if (ConciseSetUtils.isOneSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
+          newWord = wordToAdd + 1;
+        }
       }
     } else if (ConciseSetUtils.isZeroSequence(last)) {
       if (ConciseSetUtils.isAllZerosLiteral(wordToAdd)) {
@@ -306,19 +322,12 @@ public class ImmutableConciseSet
       } else if (ConciseSetUtils.isZeroSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
         newWord = last + ConciseSetUtils.getSequenceNumWords(wordToAdd);
       }
-    } else if (ConciseSetUtils.isLiteralWithSingleOneBit(last)) {
-      int position = Integer.numberOfTrailingZeros(last) + 1;
-      if (ConciseSetUtils.isAllZerosLiteral(wordToAdd)) {
-        newWord = 0x00000001 | (position << 25);
-      } else if (ConciseSetUtils.isZeroSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
-        newWord = (wordToAdd + 1) | (position << 25);
-      }
-    } else if (ConciseSetUtils.isLiteralWithSingleZeroBit(last)) {
-      int position = Integer.numberOfTrailingZeros(~last) + 1;
+    } else {
+      // last is "one sequence"
       if (ConciseSetUtils.isAllOnesLiteral(wordToAdd)) {
-        newWord = 0x40000001 | (position << 25);
+        newWord = last + 1;
       } else if (ConciseSetUtils.isOneSequence(wordToAdd) && ConciseSetUtils.getFlippedBit(wordToAdd) == -1) {
-        newWord = (wordToAdd + 1) | (position << 25);
+        newWord = last + ConciseSetUtils.getSequenceNumWords(wordToAdd);
       }
     }
 
