@@ -447,12 +447,17 @@ public class ConciseSetUtils
 
     private void resetLiteral(int offset, int word, boolean fromBeginning)
     {
-      len = 0;
-      for (int i = 0; i < MAX_LITERAL_LENGTH; i++) {
-        if ((word & (1 << i)) != 0) {
-          buffer[len++] = offset + i;
-        }
+      int len = 0;
+      word &= ALL_ONES_WITHOUT_MSB;
+      int[] buffer = this.buffer;
+      while (word != 0) {
+        int trailingZeros = Integer.numberOfTrailingZeros(word);
+        offset += trailingZeros;
+        buffer[len++] = offset;
+        word >>>= trailingZeros;
+        word--;
       }
+      this.len = len;
       current = fromBeginning ? 0 : len;
     }
 
