@@ -388,12 +388,13 @@ public class ImmutableConciseSet
           if (i.startIndex == itr.startIndex) {
             // if a literal was created from a flip bit, OR it with other literals or literals from flip bits in the same
             // position
-            if (ConciseSetUtils.isOneSequence(w)) {
-              flipBitLiteral |= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
-            } else if (ConciseSetUtils.isLiteral(w)) {
+            if (ConciseSetUtils.isLiteral(w)) {
               flipBitLiteral |= w;
-            } else {
+            } else if (ConciseSetUtils.isZeroSequence(w)) {
               flipBitLiteral |= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+            } else {
+              // w is one sequence
+              flipBitLiteral |= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
             }
           }
 
@@ -564,11 +565,12 @@ public class ImmutableConciseSet
           if (i.startIndex == itr.startIndex) {
             // if a literal was created from a flip bit, AND it with other literals or literals from flip bits in the same
             // position
-            if (ConciseSetUtils.isZeroSequence(w)) {
-              flipBitLiteral &= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
-            } else if (ConciseSetUtils.isLiteral(w)) {
+            if (ConciseSetUtils.isLiteral(w)) {
               flipBitLiteral &= w;
+            } else if (ConciseSetUtils.isZeroSequence(w)) {
+              flipBitLiteral &= ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
             } else {
+              // w is one sequence
               flipBitLiteral &= ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
             }
           }
