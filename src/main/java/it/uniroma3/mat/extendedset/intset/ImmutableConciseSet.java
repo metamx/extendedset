@@ -374,7 +374,78 @@ public class ImmutableConciseSet
         currIndex = itr.startIndex;
       }
 
-      if (ConciseSetUtils.isOneSequence(word)) {
+      if (ConciseSetUtils.isLiteral(word)) {
+        // advance all other literals
+        int qIndex = 1;
+        while (qIndex < qSize &&
+               theQ[qIndex].startIndex == itr.startIndex) {
+
+          WordIterator i = theQ[qIndex];
+          int w = i.getWord();
+
+          // if we still have zero fills with flipped bits, OR them here
+          if (ConciseSetUtils.isLiteral(w)) {
+            word |= w;
+          } else {
+            int flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+            if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
+              word |= flipBitLiteral;
+              i.advanceTo(itr.wordsWalked);
+            }
+          }
+
+          if (i.hasNext()) {
+            i.word = i.next();
+            qIndex++;
+          } else {
+            removeElement(theQ, qIndex, qSize);
+            qSize--;
+          }
+        }
+
+        // advance the set with the current literal forward and push result back to priority queue
+        addAndCompact(retVal, word);
+        currIndex++;
+
+        if (itr.hasNext()) {
+          itr.word = itr.next();
+        } else {
+          removeElement(theQ, 0, qSize);
+          qSize--;
+        }
+      } else if (ConciseSetUtils.isZeroSequence(word)) {
+        int flipBitLiteral;
+        int qIndex = 1;
+        while (qIndex < qSize &&
+               theQ[qIndex].startIndex == itr.startIndex) {
+          // check if literal can be created flip bits of other zero sequences
+          WordIterator i = theQ[qIndex];
+          int w = i.getWord();
+
+          flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
+          if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
+            i.word = flipBitLiteral;
+            qIndex++;
+          } else if (i.hasNext()) {
+            i.word = i.next();
+            qIndex++;
+          } else {
+            removeElement(theQ, qIndex, qSize);
+            qSize--;
+          }
+        }
+
+        // check if a literal needs to be created from the flipped bits of this sequence
+        flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(word);
+        if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
+          itr.word = flipBitLiteral;
+        } else if (itr.hasNext()) {
+          itr.word = itr.next();
+        } else {
+          removeElement(theQ, 0, qSize);
+          qSize--;
+        }
+      } else { // word is one sequence
         // extract a literal from the flip bits of the one sequence
         int flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(word);
 
@@ -420,77 +491,6 @@ public class ImmutableConciseSet
         currIndex = itr.wordsWalked;
 
         if (itr.hasNext()) {
-          itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
-        }
-      } else if (ConciseSetUtils.isLiteral(word)) {
-        // advance all other literals
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex == itr.startIndex) {
-
-          WordIterator i = theQ[qIndex];
-          int w = i.getWord();
-
-          // if we still have zero fills with flipped bits, OR them here
-          if (ConciseSetUtils.isLiteral(w)) {
-            word |= w;
-          } else {
-            int flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
-            if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
-              word |= flipBitLiteral;
-              i.advanceTo(itr.wordsWalked);
-            }
-          }
-
-          if (i.hasNext()) {
-            i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
-          }
-        }
-
-        // advance the set with the current literal forward and push result back to priority queue
-        addAndCompact(retVal, word);
-        currIndex++;
-
-        if (itr.hasNext()) {
-          itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
-        }
-      } else { // zero fills
-        int flipBitLiteral;
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex == itr.startIndex) {
-          // check if literal can be created flip bits of other zero sequences
-          WordIterator i = theQ[qIndex];
-          int w = i.getWord();
-
-          flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
-          if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
-            i.word = flipBitLiteral;
-            qIndex++;
-          } else if (i.hasNext()) {
-            i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
-          }
-        }
-
-        // check if a literal needs to be created from the flipped bits of this sequence
-        flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(word);
-        if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
-          itr.word = flipBitLiteral;
-        } else if (itr.hasNext()) {
           itr.word = itr.next();
         } else {
           removeElement(theQ, 0, qSize);
@@ -551,7 +551,48 @@ public class ImmutableConciseSet
         currIndex = itr.startIndex;
       }
 
-      if (ConciseSetUtils.isZeroSequence(word)) {
+      if (ConciseSetUtils.isLiteral(word)) {
+        // advance all other literals
+        int qIndex = 1;
+        while (qIndex < qSize &&
+               theQ[qIndex].startIndex == itr.startIndex) {
+
+          WordIterator i = theQ[qIndex];
+          int w = i.getWord();
+
+          // if we still have one fills with flipped bits, AND them here
+          if (ConciseSetUtils.isLiteral(w)) {
+            word &= w;
+          } else {
+            int flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
+            if (flipBitLiteral != ConciseSetUtils.ALL_ONES_LITERAL) {
+              word &= flipBitLiteral;
+              i.advanceTo(itr.wordsWalked);
+            }
+          }
+
+          if (i.hasNext()) {
+            i.word = i.next();
+            qIndex++;
+          } else {
+            removeElement(theQ, qIndex, qSize);
+            qSize--;
+            wordsWalkedAtSequenceEnd = Math.min(i.wordsWalked, wordsWalkedAtSequenceEnd);
+          }
+        }
+
+        // advance the set with the current literal forward and push result back to priority queue
+        addAndCompact(retVal, word);
+        currIndex++;
+
+        if (itr.hasNext()) {
+          itr.word = itr.next();
+        } else {
+          removeElement(theQ, 0, qSize);
+          qSize--;
+          wordsWalkedAtSequenceEnd = Math.min(itr.wordsWalked, wordsWalkedAtSequenceEnd);
+        }
+      } else if (ConciseSetUtils.isZeroSequence(word)) {
         // extract a literal from the flip bits of the zero sequence
         int flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(word);
 
@@ -595,47 +636,6 @@ public class ImmutableConciseSet
         }
         addAndCompact(retVal, newWord);
         currIndex = itr.wordsWalked;
-
-        if (itr.hasNext()) {
-          itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
-          wordsWalkedAtSequenceEnd = Math.min(itr.wordsWalked, wordsWalkedAtSequenceEnd);
-        }
-      } else if (ConciseSetUtils.isLiteral(word)) {
-        // advance all other literals
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex == itr.startIndex) {
-
-          WordIterator i = theQ[qIndex];
-          int w = i.getWord();
-
-          // if we still have one fills with flipped bits, AND them here
-          if (ConciseSetUtils.isLiteral(w)) {
-            word &= w;
-          } else {
-            int flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
-            if (flipBitLiteral != ConciseSetUtils.ALL_ONES_LITERAL) {
-              word &= flipBitLiteral;
-              i.advanceTo(itr.wordsWalked);
-            }
-          }
-
-          if (i.hasNext()) {
-            i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
-            wordsWalkedAtSequenceEnd = Math.min(i.wordsWalked, wordsWalkedAtSequenceEnd);
-          }
-        }
-
-        // advance the set with the current literal forward and push result back to priority queue
-        addAndCompact(retVal, word);
-        currIndex++;
 
         if (itr.hasNext()) {
           itr.word = itr.next();
