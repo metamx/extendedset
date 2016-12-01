@@ -317,7 +317,9 @@ public class ConciseSetUtils
 
   public static boolean isAllZerosLiteral(int word)
   {
-    return word == 0x80000000;
+    // Either 0x80000000 ("all zeros literal" as it is) or 0, that is "zero sequence of 1 block" = 31 bits,
+    // i. e. semantically equivalent to "all zeros literal".
+    return (word & ALL_ONES_WITHOUT_MSB) == 0;
   }
 
   public static boolean isLiteralWithSingleZeroBit(int word)
