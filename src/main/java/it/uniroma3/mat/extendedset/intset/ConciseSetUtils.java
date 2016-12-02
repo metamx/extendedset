@@ -108,7 +108,7 @@ public class ConciseSetUtils
    */
   public static int maxLiteralLengthMultiplication(int n)
   {
-    return (n << 5) - n;
+    return n * 31;
   }
 
   /**
@@ -132,9 +132,8 @@ public class ConciseSetUtils
    */
   public static boolean isLiteral(int word)
   {
-    // "word" must be 1*
-    // NOTE: this is faster than "return (word & 0x80000000) == 0x80000000"
-    return (word & 0x80000000) != 0;
+    // the highest one bit should be 1, which means the word as a number is negative
+    return word < 0;
   }
 
   /**
@@ -284,7 +283,7 @@ public class ConciseSetUtils
 
   public static int flipBitAsBinaryString(int flipBit)
   {
-    return ((Number) Math.pow(2, flipBit)).intValue();
+    return 1 << flipBit;
   }
 
   /**
@@ -296,7 +295,7 @@ public class ConciseSetUtils
    */
   public static int getLiteralBitCount(int word)
   {
-    return BitCount.count(getLiteralBits(word));
+    return Integer.bitCount(getLiteralBits(word));
   }
 
   /**
@@ -313,17 +312,19 @@ public class ConciseSetUtils
 
   public static boolean isAllOnesLiteral(int word)
   {
-    return (word & -1) == -1;
+    return word == -1;
   }
 
   public static boolean isAllZerosLiteral(int word)
   {
-    return (word | 0x80000000) == 0x80000000;
+    // Either 0x80000000 ("all zeros literal" as it is) or 0, that is "zero sequence of 1 block" = 31 bits,
+    // i. e. semantically equivalent to "all zeros literal".
+    return (word & ALL_ONES_WITHOUT_MSB) == 0;
   }
 
   public static boolean isLiteralWithSingleZeroBit(int word)
   {
-    return isLiteral(word) && (Integer.bitCount(~word) == 1);
+    return isLiteral(word) && Integer.bitCount(word) == 31;
   }
 
   public static boolean isLiteralWithSingleOneBit(int word)
@@ -424,27 +425,35 @@ public class ConciseSetUtils
     public void reset(int offset, int word, boolean fromBeginning)
     {
       if (isLiteral(word)) {
-        len = 0;
-        for (int i = 0; i < MAX_LITERAL_LENGTH; i++) {
-          if ((word & (1 << i)) != 0) {
-            buffer[len++] = offset + i;
-          }
-        }
-        current = fromBeginning ? 0 : len;
+        resetLiteral(offset, word, fromBeginning);
+      } else if (isZeroSequence(word)) {
+        resetZeroSequence(offset, word, fromBeginning);
       } else {
-        if (isZeroSequence(word)) {
-          if (isSequenceWithNoBits(word)) {
-            len = 0;
-            current = 0;
-          } else {
-            len = 1;
-            buffer[0] = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
-            current = fromBeginning ? 0 : 1;
-          }
-        } else {
-          throw new RuntimeException("sequence of ones!");
+        throw new RuntimeException("sequence of ones!");
+      }
+    }
+
+    private void resetZeroSequence(int offset, int word, boolean fromBeginning)
+    {
+      if (isSequenceWithNoBits(word)) {
+        len = 0;
+        current = 0;
+      } else {
+        len = 1;
+        buffer[0] = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
+        current = fromBeginning ? 0 : 1;
+      }
+    }
+
+    private void resetLiteral(int offset, int word, boolean fromBeginning)
+    {
+      len = 0;
+      for (int i = 0; i < MAX_LITERAL_LENGTH; i++) {
+        if ((word & (1 << i)) != 0) {
+          buffer[len++] = offset + i;
         }
       }
+      current = fromBeginning ? 0 : len;
     }
 
     @Override
