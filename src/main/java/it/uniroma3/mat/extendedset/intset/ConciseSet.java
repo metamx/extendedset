@@ -390,7 +390,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    */
   private static int getLiteralBitCount(int word)
   {
-    return BitCount.count(getLiteralBits(word));
+    return Integer.bitCount(getLiteralBits(word));
   }
 
   /**
@@ -1395,7 +1395,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
           if ((w & (1 << bitPosition)) == 0) {
             return -1;
           }
-          return index + BitCount.count(w & ~(0xFFFFFFFF << bitPosition));
+          return index + Integer.bitCount(w & ~(0xFFFFFFFF << bitPosition));
         }
         blockIndex--;
         index += getLiteralBitCount(w);
@@ -1412,7 +1412,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
             if ((l & (1 << bitPosition)) == 0) {
               return -1;
             }
-            return index + BitCount.count(l & ~(0xFFFFFFFF << bitPosition));
+            return index + Integer.bitCount(l & ~(0xFFFFFFFF << bitPosition));
           }
 
           // if we are in the middle of a sequence of 1's, the bit already exist
