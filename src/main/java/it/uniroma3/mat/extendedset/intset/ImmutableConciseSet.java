@@ -30,6 +30,7 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.PriorityQueue;
 
 public class ImmutableConciseSet
 {
@@ -341,7 +342,10 @@ public class ImmutableConciseSet
   private static ImmutableConciseSet doUnion(Iterator<ImmutableConciseSet> sets)
   {
     IntList retVal = new IntList();
-    List<WordIterator> iterators = new ArrayList<>();
+    // Use PriorityQueue, because sometimes as much as 20k of bitsets are unified, and the asymptotic complexity of
+    // keeping bitsets in a sorted array (n^2), as in doIntersection(), becomes more important factor than PriorityQueue
+    // inefficiency.
+    PriorityQueue<WordIterator> theQ = new PriorityQueue<>(UNION_COMPARATOR);
 
     // populate priority queue
     while (sets.hasNext()) {
@@ -350,21 +354,17 @@ public class ImmutableConciseSet
       if (set != null && !set.isEmpty()) {
         WordIterator itr = set.newWordIterator();
         itr.word = itr.next();
-        iterators.add(itr);
+        theQ.add(itr);
       }
     }
 
-
-    WordIterator[] theQ = iterators.toArray(new WordIterator[0]);
-    sort(theQ, theQ.length, UNION_COMPARATOR);
-    int qSize = theQ.length;
-
     int currIndex = 0;
 
-    while (qSize > 0) {
+    List<WordIterator> changedIterators = new ArrayList<>();
 
+    while (!theQ.isEmpty()) {
       // grab the top element from the priority queue
-      WordIterator itr = theQ[0];
+      WordIterator itr = theQ.poll();
       int word = itr.getWord();
 
       // if the next word in the queue starts at a different point than where we ended off we need to create a zero gap
@@ -376,11 +376,8 @@ public class ImmutableConciseSet
 
       if (ConciseSetUtils.isLiteral(word)) {
         // advance all other literals
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex == itr.startIndex) {
-
-          WordIterator i = theQ[qIndex];
+        while (!theQ.isEmpty() && theQ.peek().startIndex == itr.startIndex) {
+          WordIterator i = theQ.poll();
           int w = i.getWord();
 
           // if we still have zero fills with flipped bits, OR them here
@@ -396,10 +393,7 @@ public class ImmutableConciseSet
 
           if (i.hasNext()) {
             i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
+            changedIterators.add(i);
           }
         }
 
@@ -409,29 +403,21 @@ public class ImmutableConciseSet
 
         if (itr.hasNext()) {
           itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
+          changedIterators.add(itr);
         }
       } else if (ConciseSetUtils.isZeroSequence(word)) {
         int flipBitLiteral;
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex == itr.startIndex) {
-          // check if literal can be created flip bits of other zero sequences
-          WordIterator i = theQ[qIndex];
+        while (!theQ.isEmpty() && theQ.peek().startIndex == itr.startIndex) {
+          WordIterator i = theQ.poll();
           int w = i.getWord();
 
           flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(w);
           if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
             i.word = flipBitLiteral;
-            qIndex++;
+            changedIterators.add(i);
           } else if (i.hasNext()) {
             i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
+            changedIterators.add(i);
           }
         }
 
@@ -439,21 +425,18 @@ public class ImmutableConciseSet
         flipBitLiteral = ConciseSetUtils.getLiteralFromZeroSeqFlipBit(word);
         if (flipBitLiteral != ConciseSetUtils.ALL_ZEROS_LITERAL) {
           itr.word = flipBitLiteral;
+          changedIterators.add(itr);
         } else if (itr.hasNext()) {
           itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
+          changedIterators.add(itr);
         }
       } else { // word is one sequence
         // extract a literal from the flip bits of the one sequence
         int flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(word);
 
         // advance everything past the longest ones sequence
-        int qIndex = 1;
-        while (qIndex < qSize &&
-               theQ[qIndex].startIndex < itr.wordsWalked) {
-          WordIterator i = theQ[qIndex];
+        while (!theQ.isEmpty() && theQ.peek().startIndex < itr.wordsWalked) {
+          WordIterator i = theQ.poll();
           int w = i.getWord();
 
           if (i.startIndex == itr.startIndex) {
@@ -472,10 +455,7 @@ public class ImmutableConciseSet
           i.advanceTo(itr.wordsWalked);
           if (i.hasNext()) {
             i.word = i.next();
-            qIndex++;
-          } else {
-            removeElement(theQ, qIndex, qSize);
-            qSize--;
+            changedIterators.add(i);
           }
         }
 
@@ -492,13 +472,12 @@ public class ImmutableConciseSet
 
         if (itr.hasNext()) {
           itr.word = itr.next();
-        } else {
-          removeElement(theQ, 0, qSize);
-          qSize--;
+          changedIterators.add(itr);
         }
       }
 
-      sort(theQ, qSize, UNION_COMPARATOR);
+      theQ.addAll(changedIterators);
+      changedIterators.clear();
     }
 
     if (retVal.isEmpty()) {
@@ -524,6 +503,9 @@ public class ImmutableConciseSet
       itr.word = itr.next();
       iterators.add(itr);
     }
+    // Keep iterators in a sorted array, because usually only a few bitsets are intersected, very rarely - a few dozens.
+    // Sorted array approach was benchmarked and proven to be faster than PriorityQueue (as in doUnion()) up to 100
+    // bitsets.
     WordIterator[] theQ = iterators.toArray(new WordIterator[0]);
     sort(theQ, theQ.length, INTERSECTION_COMPARATOR);
 
