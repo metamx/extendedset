@@ -507,14 +507,14 @@ public class ImmutableConciseSet
     // Sorted array approach was benchmarked and proven to be faster than PriorityQueue (as in doUnion()) up to 100
     // bitsets.
     WordIterator[] theQ = iterators.toArray(new WordIterator[0]);
-    sort(theQ, theQ.length, INTERSECTION_COMPARATOR);
-
     int qSize = theQ.length;
+    partialSort(theQ, qSize - 1, qSize, INTERSECTION_COMPARATOR);
 
     int currIndex = 0;
     int wordsWalkedAtSequenceEnd = Integer.MAX_VALUE;
 
     while (qSize > 0) {
+      int maxChangedIndex = -1;
 
       // grab the top element from the priority queue
       WordIterator itr = theQ[0];
@@ -555,6 +555,7 @@ public class ImmutableConciseSet
 
           if (i.hasNext()) {
             i.word = i.next();
+            maxChangedIndex = qIndex;
             qIndex++;
           } else {
             removeElement(theQ, qIndex, qSize);
@@ -569,6 +570,7 @@ public class ImmutableConciseSet
 
         if (itr.hasNext()) {
           itr.word = itr.next();
+          maxChangedIndex = Math.max(maxChangedIndex, 0);
         } else {
           removeElement(theQ, 0, qSize);
           qSize--;
@@ -601,6 +603,7 @@ public class ImmutableConciseSet
           i.advanceTo(itr.wordsWalked);
           if (i.hasNext()) {
             i.word = i.next();
+            maxChangedIndex = qIndex;
             qIndex++;
           } else {
             removeElement(theQ, qIndex, qSize);
@@ -621,6 +624,7 @@ public class ImmutableConciseSet
 
         if (itr.hasNext()) {
           itr.word = itr.next();
+          maxChangedIndex = Math.max(maxChangedIndex, 0);
         } else {
           removeElement(theQ, 0, qSize);
           qSize--;
@@ -638,9 +642,11 @@ public class ImmutableConciseSet
           flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(w);
           if (flipBitLiteral != ConciseSetUtils.ALL_ONES_LITERAL) {
             i.word = flipBitLiteral;
+            maxChangedIndex = qIndex;
             qIndex++;
           } else if (i.hasNext()) {
             i.word = i.next();
+            maxChangedIndex = qIndex;
             qIndex++;
           } else {
             removeElement(theQ, qIndex, qSize);
@@ -653,8 +659,10 @@ public class ImmutableConciseSet
         flipBitLiteral = ConciseSetUtils.getLiteralFromOneSeqFlipBit(word);
         if (flipBitLiteral != ConciseSetUtils.ALL_ONES_LITERAL) {
           itr.word = flipBitLiteral;
+          maxChangedIndex = Math.max(maxChangedIndex, 0);
         } else if (itr.hasNext()) {
           itr.word = itr.next();
+          maxChangedIndex = Math.max(maxChangedIndex, 0);
         } else {
           removeElement(theQ, 0, qSize);
           qSize--;
@@ -662,7 +670,9 @@ public class ImmutableConciseSet
         }
       }
 
-      sort(theQ, qSize, INTERSECTION_COMPARATOR);
+      if (maxChangedIndex >= 0) {
+        partialSort(theQ, maxChangedIndex, qSize, INTERSECTION_COMPARATOR);
+      }
     }
 
     // fill in any missing one sequences
@@ -676,19 +686,26 @@ public class ImmutableConciseSet
     return new ImmutableConciseSet(IntBuffer.wrap(retVal.toArray()));
   }
 
-  private static void sort(final WordIterator[] a, final int to, final Comparator<WordIterator> comp)
+  /**
+   * Variation of insertion sort, elements [maxChangedIndex + 1, size) are sorted, elements [0, maxChangedIndex] should
+   * be inserted into that sorted range.
+   */
+  private static void partialSort(
+      final WordIterator[] a,
+      final int maxChangedIndex,
+      final int size,
+      final Comparator<WordIterator> comp
+  )
   {
-    // Bubble sort, copied from http://stackoverflow.com/a/16089042/648955
-    // Bubble sort seems to be the most efficient sorting algorithm when the number of elements to sort is very
-    // small (in this case mostly 2-4).
-    for (int i = 0; i < to; i++) {
-      for (int j = 1; j < (to - i); j++) {
-        WordIterator it1 = a[j - 1];
+    for (int i = maxChangedIndex; i >= 0; i--) {
+      WordIterator it = a[i];
+      for (int j = i + 1; j < size; j++) {
         WordIterator it2 = a[j];
-        if (comp.compare(it1, it2) > 0) {
-          a[j - 1] = it2;
-          a[j] = it1;
+        if (comp.compare(it, it2) <= 0) {
+          break;
         }
+        a[j - 1] = it2;
+        a[j] = it;
       }
     }
   }
