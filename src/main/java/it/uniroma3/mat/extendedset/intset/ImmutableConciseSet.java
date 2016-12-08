@@ -345,7 +345,7 @@ public class ImmutableConciseSet
     // Use PriorityQueue, because sometimes as much as 20k of bitsets are unified, and the asymptotic complexity of
     // keeping bitsets in a sorted array (n^2), as in doIntersection(), becomes more important factor than PriorityQueue
     // inefficiency.
-    PriorityQueue<WordIterator> theQ = new PriorityQueue<>(UNION_COMPARATOR);
+    PriorityQueue<WordIterator> theQ = new PriorityQueue<WordIterator>(UNION_COMPARATOR);
 
     // populate priority queue
     while (sets.hasNext()) {
