@@ -1097,6 +1097,33 @@ public class ImmutableConciseSetTest
     verifyUnion(expected, sets);
   }
 
+  @Test
+  public void testUnion23()
+  {
+    ConciseSet set1 = new ConciseSet();
+    set1.add(10);
+    set1.add(1000);
+
+    ConciseSet set2 = new ConciseSet();
+    for (int i = 0; i < 10; i++) {
+      set2.add(i);
+    }
+    for (int i = 11; i < 1000; i++) {
+      set2.add(i);
+    }
+
+    List<ImmutableConciseSet> sets = Arrays.asList(
+        ImmutableConciseSet.compact(ImmutableConciseSet.newImmutableFromMutable(set1)),
+        ImmutableConciseSet.compact(ImmutableConciseSet.newImmutableFromMutable(set2))
+    );
+    List<Integer> expected = new ArrayList<>();
+    for (int i = 0; i <= 1000; i++) {
+      expected.add(i);
+    }
+
+    verifyUnion(expected, sets);
+  }
+
   private void verifyUnion(List<Integer> expected, List<ImmutableConciseSet> sets)
   {
     List<Integer> actual = Lists.newArrayList();
