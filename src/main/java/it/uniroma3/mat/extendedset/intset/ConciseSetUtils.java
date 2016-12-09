@@ -454,8 +454,8 @@ public class ConciseSetUtils
         int trailingZeros = Integer.numberOfTrailingZeros(word);
         offset += trailingZeros;
         buffer[len++] = offset;
-        word >>>= trailingZeros;
-        word--;
+        word >>= trailingZeros;
+        word--; // clear the lowest bit
       }
       this.len = len;
       current = fromBeginning ? 0 : len;
