@@ -1128,7 +1128,7 @@ public class ImmutableConciseSet
     // but this is uncertain
     int word;
 
-    private volatile boolean hasNextWord = false;
+    private boolean hasNextWord = false;
 
     WordIterator()
     {

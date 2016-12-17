@@ -114,7 +114,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
    * User for <i>fail-fast</i> iterator. It counts the number of operations
    * that <i>do</i> modify {@link #words}
    */
-  protected transient volatile int modCount = 0;
+  protected transient int modCount = 0;
 
   /**
    * Resets to an empty set
