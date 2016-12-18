@@ -1004,55 +1004,70 @@ public class ImmutableConciseSet
   // Based on the ConciseSet implementation by Alessandro Colantonio
   private class BitIterator implements IntSet.IntIterator
   {
-    final ConciseSetUtils.LiteralAndZeroFillExpander litExp;
-    final ConciseSetUtils.OneFillExpander oneExp;
-
-    ConciseSetUtils.WordExpander exp;
+    private boolean literalAndZeroFill;
     int nextIndex = 0;
     int nextOffset = 0;
+    int next = -1;
 
     private BitIterator()
     {
-      litExp = ConciseSetUtils.newLiteralAndZeroFillExpander();
-      oneExp = ConciseSetUtils.newOneFillExpander();
-
       nextWord();
+      next = advance();
     }
 
     private BitIterator(
-        ConciseSetUtils.LiteralAndZeroFillExpander litExp,
-        ConciseSetUtils.OneFillExpander oneExp,
-        ConciseSetUtils.WordExpander exp,
-        int nextIndex,
-        int nextOffset
+            boolean literalAndZeroFill,
+            int nextIndex,
+            int nextOffset,
+            int next,
+            int literalAndZeroFillLen,
+            int literalAndZeroFillCurrent,
+            int oneFillFirstInt,
+            int oneFillLastInt,
+            int oneFillCurrent,
+            int oneFillException
     )
     {
-      this.litExp = litExp;
-      this.oneExp = oneExp;
-      this.exp = exp;
+      this.literalAndZeroFill = literalAndZeroFill;
       this.nextIndex = nextIndex;
       this.nextOffset = nextOffset;
+      this.next = next;
+      this.literalAndZeroFillLen = literalAndZeroFillLen;
+      this.literalAndZeroFillCurrent = literalAndZeroFillCurrent;
+      this.oneFillFirstInt = oneFillFirstInt;
+      this.oneFillLastInt = oneFillLastInt;
+      this.oneFillCurrent = oneFillCurrent;
+      this.oneFillException = oneFillException;
     }
 
     @Override
     public boolean hasNext()
     {
-      while (!exp.hasNext()) {
+      return next >= 0;
+    }
+
+    private int advance()
+    {
+      int wordExpanderNext;
+      while ((wordExpanderNext = wordExpanderAdvance()) < 0) {
         if (nextIndex > lastWordIndex) {
-          return false;
+          return -1;
         }
         nextWord();
       }
-      return true;
+      return wordExpanderNext;
     }
 
     @Override
     public int next()
     {
-      if (!hasNext()) {
+      int prev = next;
+      if (prev >= 0) {
+        next = advance();
+        return prev;
+      } else {
         throw new NoSuchElementException();
       }
-      return exp.next();
     }
 
     @Override
@@ -1064,9 +1079,17 @@ public class ImmutableConciseSet
     @Override
     public void skipAllBefore(int element)
     {
+      if (element <= next)
+        return;
       while (true) {
-        exp.skipAllBefore(element);
-        if (exp.hasNext() || nextIndex > lastWordIndex) {
+        wordExpanderSkipAllBefore(element);
+        int wordExpanderNext = wordExpanderAdvance();
+        if (wordExpanderNext >= 0) {
+          next = wordExpanderNext;
+          return;
+        }
+        if (nextIndex > lastWordIndex) {
+          next = -1;
           return;
         }
         nextWord();
@@ -1076,20 +1099,32 @@ public class ImmutableConciseSet
     @Override
     public IntSet.IntIterator clone()
     {
-      return new BitIterator(
-          (ConciseSetUtils.LiteralAndZeroFillExpander) litExp.clone(),
-          (ConciseSetUtils.OneFillExpander) oneExp.clone(),
-          exp.clone(),
-          nextIndex,
-          nextOffset
+      BitIterator clone = new BitIterator(
+              literalAndZeroFill,
+              nextIndex,
+              nextOffset,
+              next,
+              literalAndZeroFillLen,
+              literalAndZeroFillCurrent,
+              oneFillFirstInt,
+              oneFillLastInt,
+              oneFillCurrent,
+              oneFillException
       );
+      System.arraycopy(
+              literalAndZeroFillBuffer,
+              0,
+              clone.literalAndZeroFillBuffer,
+              0,
+              literalAndZeroFillBuffer.length
+      );
+      return clone;
     }
 
     private void nextWord()
     {
       final int word = words.get(nextIndex++);
-      exp = ConciseSetUtils.isOneSequence(word) ? oneExp : litExp;
-      exp.reset(nextOffset, word, true);
+      literalAndZeroFill = wordExpanderReset(nextOffset, word);
 
       // prepare next offset
       if (ConciseSetUtils.isLiteral(word)) {
@@ -1097,6 +1132,131 @@ public class ImmutableConciseSet
       } else {
         nextOffset += ConciseSetUtils.maxLiteralLengthMultiplication(ConciseSetUtils.getSequenceCount(word) + 1);
       }
+    }
+
+    private int wordExpanderAdvance()
+    {
+      return literalAndZeroFill ? literalAndZeroFillAdvance() : oneFillAdvance();
+    }
+
+    private void wordExpanderSkipAllBefore(int i)
+    {
+      if (literalAndZeroFill) {
+        literalAndZeroFillSkipAllBefore(i);
+      } else {
+        oneFillSkipAllBefore(i);
+      }
+    }
+
+    private boolean wordExpanderReset(int offset, int word)
+    {
+      if (ConciseSetUtils.isLiteral(word)) {
+        literalAndZeroFillResetLiteral(offset, word);
+        return true;
+      } else if (ConciseSetUtils.isZeroSequence(word)) {
+        literalAndZeroFillResetZeroSequence(offset, word);
+        return true;
+      } else {
+        // one sequence
+        oneFillReset(offset, word);
+        return false;
+      }
+    }
+
+    final int[] literalAndZeroFillBuffer = new int[ConciseSetUtils.MAX_LITERAL_LENGTH];
+    int literalAndZeroFillLen = 0;
+    int literalAndZeroFillCurrent = 0;
+
+    private int literalAndZeroFillAdvance()
+    {
+      if (literalAndZeroFillCurrent < literalAndZeroFillLen) {
+        return literalAndZeroFillBuffer[literalAndZeroFillCurrent++];
+      } else {
+        return -1;
+      }
+    }
+
+    private void literalAndZeroFillSkipAllBefore(int i)
+    {
+      while (literalAndZeroFillCurrent < literalAndZeroFillLen &&
+             literalAndZeroFillBuffer[literalAndZeroFillCurrent] < i) {
+        literalAndZeroFillCurrent++;
+      }
+    }
+
+    private void literalAndZeroFillResetZeroSequence(int offset, int word)
+    {
+      if (ConciseSetUtils.isSequenceWithNoBits(word)) {
+        literalAndZeroFillLen = 0;
+        literalAndZeroFillCurrent = 0;
+      } else {
+        literalAndZeroFillLen = 1;
+        literalAndZeroFillBuffer[0] = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
+        literalAndZeroFillCurrent = 0;
+      }
+    }
+
+    private void literalAndZeroFillResetLiteral(int offset, int word)
+    {
+      literalAndZeroFillLen = 0;
+      for (int i = 0; i < ConciseSetUtils.MAX_LITERAL_LENGTH; i++) {
+        if ((word & (1 << i)) != 0) {
+          literalAndZeroFillBuffer[literalAndZeroFillLen++] = offset + i;
+        }
+      }
+      literalAndZeroFillCurrent = 0;
+    }
+
+    int oneFillFirstInt = 1;
+    int oneFillLastInt = -1;
+    int oneFillCurrent = 0;
+    int oneFillException = -1;
+
+    private int oneFillAdvance()
+    {
+      int oneFillCurrent = this.oneFillCurrent;
+      if (oneFillCurrent < oneFillLastInt) {
+        return oneFillDoAdvance(oneFillCurrent);
+      } else {
+        return -1;
+      }
+    }
+
+    private int oneFillDoAdvance(int oneFillCurrent)
+    {
+      oneFillCurrent++;
+      if (oneFillCurrent == oneFillException) {
+        oneFillCurrent++;
+      }
+      this.oneFillCurrent = oneFillCurrent;
+      return oneFillCurrent;
+    }
+
+    private void oneFillSkipAllBefore(int i)
+    {
+      if (i <= oneFillCurrent) {
+        return;
+      }
+      oneFillCurrent = i - 1;
+    }
+
+    private void oneFillReset(int offset, int word)
+    {
+      if (!ConciseSetUtils.isOneSequence(word)) {
+        throw new RuntimeException("NOT a sequence of ones!");
+      }
+      oneFillFirstInt = offset;
+      oneFillLastInt = offset + ConciseSetUtils.maxLiteralLengthMultiplication(ConciseSetUtils.getSequenceCount(word) + 1) - 1;
+
+      oneFillException = offset + ((0x3FFFFFFF & word) >>> 25) - 1;
+      if (oneFillException == oneFillFirstInt) {
+        oneFillFirstInt++;
+      }
+      if (oneFillException == oneFillLastInt) {
+        oneFillLastInt--;
+      }
+
+      oneFillCurrent = oneFillFirstInt - 1;
     }
   }
 
