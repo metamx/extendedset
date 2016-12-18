@@ -29,7 +29,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.PriorityQueue;
 
 public class ImmutableConciseSet
@@ -781,8 +780,8 @@ public class ImmutableConciseSet
     } while (true);
   }
 
-  private final IntBuffer words;
-  private final int lastWordIndex;
+  final IntBuffer words;
+  final int lastWordIndex;
   private final int size;
 
   public ImmutableConciseSet()
@@ -991,129 +990,14 @@ public class ImmutableConciseSet
   public IntSet.IntIterator iterator()
   {
     if (isEmpty()) {
-      return new IntSet.IntIterator()
-      {
-        @Override
-        public void skipAllBefore(int element) {/*empty*/}
-
-        @Override
-        public boolean hasNext() {return false;}
-
-        @Override
-        public int next() {throw new NoSuchElementException();}
-
-        @Override
-        public void remove() {throw new UnsupportedOperationException();}
-
-        @Override
-        public IntSet.IntIterator clone() {throw new UnsupportedOperationException();}
-      };
+      return EmptyIntIterator.instance();
     }
-    return new BitIterator();
+    return new BitIterator(this);
   }
 
   public WordIterator newWordIterator()
   {
     return new WordIterator();
-  }
-
-  // Based on the ConciseSet implementation by Alessandro Colantonio
-  private class BitIterator implements IntSet.IntIterator
-  {
-    final ConciseSetUtils.LiteralAndZeroFillExpander litExp;
-    final ConciseSetUtils.OneFillExpander oneExp;
-
-    ConciseSetUtils.WordExpander exp;
-    int nextIndex = 0;
-    int nextOffset = 0;
-
-    private BitIterator()
-    {
-      litExp = ConciseSetUtils.newLiteralAndZeroFillExpander();
-      oneExp = ConciseSetUtils.newOneFillExpander();
-
-      nextWord();
-    }
-
-    private BitIterator(
-        ConciseSetUtils.LiteralAndZeroFillExpander litExp,
-        ConciseSetUtils.OneFillExpander oneExp,
-        ConciseSetUtils.WordExpander exp,
-        int nextIndex,
-        int nextOffset
-    )
-    {
-      this.litExp = litExp;
-      this.oneExp = oneExp;
-      this.exp = exp;
-      this.nextIndex = nextIndex;
-      this.nextOffset = nextOffset;
-    }
-
-    @Override
-    public boolean hasNext()
-    {
-      while (!exp.hasNext()) {
-        if (nextIndex > lastWordIndex) {
-          return false;
-        }
-        nextWord();
-      }
-      return true;
-    }
-
-    @Override
-    public int next()
-    {
-      if (!hasNext()) {
-        throw new NoSuchElementException();
-      }
-      return exp.next();
-    }
-
-    @Override
-    public void remove()
-    {
-      throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void skipAllBefore(int element)
-    {
-      while (true) {
-        exp.skipAllBefore(element);
-        if (exp.hasNext() || nextIndex > lastWordIndex) {
-          return;
-        }
-        nextWord();
-      }
-    }
-
-    @Override
-    public IntSet.IntIterator clone()
-    {
-      return new BitIterator(
-          (ConciseSetUtils.LiteralAndZeroFillExpander) litExp.clone(),
-          (ConciseSetUtils.OneFillExpander) oneExp.clone(),
-          exp.clone(),
-          nextIndex,
-          nextOffset
-      );
-    }
-
-    private void nextWord()
-    {
-      final int word = words.get(nextIndex++);
-      exp = ConciseSetUtils.isOneSequence(word) ? oneExp : litExp;
-      exp.reset(nextOffset, word, true);
-
-      // prepare next offset
-      if (ConciseSetUtils.isLiteral(word)) {
-        nextOffset += ConciseSetUtils.MAX_LITERAL_LENGTH;
-      } else {
-        nextOffset += ConciseSetUtils.maxLiteralLengthMultiplication(ConciseSetUtils.getSequenceCount(word) + 1);
-      }
-    }
   }
 
   public class WordIterator implements org.roaringbitmap.IntIterator, Cloneable
