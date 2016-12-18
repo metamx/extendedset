@@ -1991,23 +1991,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
   public IntIterator iterator()
   {
     if (isEmpty()) {
-      return new IntIterator()
-      {
-        @Override
-        public void skipAllBefore(int element) {/*empty*/}
-
-        @Override
-        public boolean hasNext() {return false;}
-
-        @Override
-        public int next() {throw new NoSuchElementException();}
-
-        @Override
-        public void remove() {throw new UnsupportedOperationException();}
-
-        @Override
-        public IntIterator clone() {throw new UnsupportedOperationException();}
-      };
+      return EmptyIntIterator.instance();
     }
     return new BitIterator();
   }
@@ -2019,23 +2003,7 @@ public class ConciseSet extends AbstractIntSet implements java.io.Serializable
   public IntIterator descendingIterator()
   {
     if (isEmpty()) {
-      return new IntIterator()
-      {
-        @Override
-        public void skipAllBefore(int element) {/*empty*/}
-
-        @Override
-        public boolean hasNext() {return false;}
-
-        @Override
-        public int next() {throw new NoSuchElementException();}
-
-        @Override
-        public void remove() {throw new UnsupportedOperationException();}
-
-        @Override
-        public IntIterator clone() {throw new UnsupportedOperationException();}
-      };
+      return EmptyIntIterator.instance();
     }
     return new ReverseBitIterator();
   }
