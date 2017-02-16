@@ -806,6 +806,10 @@ public class ImmutableConciseSet
     this.size = calcSize();
   }
 
+  public IntBuffer toIntBuffer(){
+    return words.asReadOnlyBuffer();
+  }
+
   public byte[] toBytes()
   {
     if (words == null) {
